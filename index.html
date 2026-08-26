@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#182138" />
+    <title>Midnight Spur</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Condensed:wght@400;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230c1220'/%3E%3C!-- Hat Crown --%3E%3Crect x='8' y='8' width='16' height='10' fill='%23d7a65f'/%3E%3Crect x='6' y='6' width='20' height='2' fill='%23101522'/%3E%3C!-- Hat Band --%3E%3Crect x='8' y='14' width='16' height='3' fill='%23cf5e4d'/%3E%3C!-- Hat Brim --%3E%3Crect x='3' y='17' width='26' height='4' fill='%23d7a65f'/%3E%3Crect x='2' y='18' width='28' height='2' fill='%23d7a65f'/%3E%3C!-- Spur Star (Bottom Right) --%3E%3Crect x='22' y='23' width='6' height='6' fill='%23fce0a0'/%3E%3Crect x='24' y='21' width='2' height='10' fill='%23fce0a0'/%3E%3Crect x='20' y='25' width='10' height='2' fill='%23fce0a0'/%3E%3C/svg%3E"
+        type="image/svg+xml" />
+</head>
+
+<body>
+    <main class="app-shell">
+        <!-- 1. Title Menu Screen -->
+        <section id="menuScreen" class="screen screen--menu is-active" aria-labelledby="menuTitle">
+            <div class="poster">
+                <p class="eyebrow">Dusk settles. Pistols rise.</p>
+                <h1 id="menuTitle">Midnight Spur</h1>
+                <div class="menu-card">
+                    <button id="startButton" class="primary-button">Start Game</button>
+                    <button id="scoresButton" class="secondary-button" type="button">High Scores</button>
+                </div>
+                <p class="arcade-insert-coin">PRESS START OR SPACE</p>
+            </div>
+        </section>
+
+        <!-- 2. Main Gameplay / Duel Arena Screen -->
+        <section id="gameScreen" class="screen screen--game" aria-labelledby="gameTitle" hidden>
+            <header class="hud">
+                <div>
+                    <p class="hud-label">Round</p>
+                    <strong id="roundValue">1</strong>
+                </div>
+                <div>
+                    <p class="hud-label">Bounty</p>
+                    <strong id="bountyValue">$0</strong>
+                </div>
+                <div>
+                    <p class="hud-label">Wins</p>
+                    <strong id="winsValue">0</strong>
+                </div>
+            </header>
+
+            <div class="arena-frame">
+                <div class="arena-glow"></div>
+                <div id="demoMarquee" class="demo-marquee" hidden>DEMO PLAY</div>
+                <div class="status-banner" aria-live="assertive">
+                    <p id="statusText">Wait for the signal.</p>
+                </div>
+                <canvas id="gameCanvas" width="960" height="540" aria-label="Wild west duel arena"></canvas>
+            </div>
+
+            <div class="controls">
+                <button id="drawButton" class="draw-button" type="button">DRAW</button>
+                <p class="hint">Tap once when the moment feels right. Fire early and you lose.</p>
+            </div>
+
+            <div class="utility-bar">
+                <button id="pauseButton" class="utility-button" type="button">Pause</button>
+                <button id="muteButton" class="utility-button" type="button">Mute</button>
+                <button id="exitButton" class="utility-button" type="button">Quit</button>
+            </div>
+        </section>
+
+        <!-- 3. Arcade High Scores Leaderboard Screen -->
+        <section id="scoresScreen" class="screen screen--scores" aria-labelledby="scoresTitle" hidden>
+            <div class="poster scores-poster">
+                <p class="eyebrow">Top Guns of the County</p>
+                <h2 id="scoresTitle">HIGH SCORES</h2>
+                <div id="scoresTable" class="scores-table">
+                    <!-- Populated dynamically: Rank, Initials, Bounty -->
+                </div>
+                <button id="scoresBackButton" class="primary-button" type="button">Back to Title</button>
+            </div>
+        </section>
+
+        <!-- 4. Arcade 3-Letter Initials Entry Screen -->
+        <section id="entryScreen" class="screen screen--entry" aria-labelledby="entryTitle" hidden>
+            <div class="poster entry-poster">
+                <p class="eyebrow">New County Record</p>
+                <h2 id="entryTitle">ENTER INITIALS</h2>
+                <p class="subcopy">Use Left/Right to change letter, DRAW/Enter to lock in.</p>
+                <div class="initials-input-container">
+                    <span id="charSlot0" class="char-slot is-selected">A</span>
+                    <span id="charSlot1" class="char-slot">A</span>
+                    <span id="charSlot2" class="char-slot">A</span>
+                </div>
+                <div class="entry-controls">
+                    <button id="prevCharBtn" class="utility-button" type="button">&lt;</button>
+                    <button id="confirmCharBtn" class="primary-button" type="button">SELECT</button>
+                    <button id="nextCharBtn" class="utility-button" type="button">&gt;</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Game Over / Result Screen -->
+        <section id="resultScreen" class="screen screen--result" aria-labelledby="resultTitle" hidden>
+            <div class="result-card">
+                <p id="resultBadge" class="eyebrow">Duel ended</p>
+                <h2 id="resultTitle">Game Over</h2>
+                <p id="resultMessage" class="subcopy">The outlaw got the first shot.</p>
+                <div class="result-stats">
+                    <div>
+                        <span>Wins</span>
+                        <strong id="finalWins">0</strong>
+                    </div>
+                    <div>
+                        <span>Best</span>
+                        <strong id="finalBest">0</strong>
+                    </div>
+                </div>
+                <button id="playAgainButton" class="primary-button" type="button">Play Again</button>
+                <button id="backToMenuButton" class="secondary-button" type="button">Main Menu</button>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+</body>
+
+</html>
