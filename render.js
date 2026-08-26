@@ -1,4 +1,4 @@
-// render.js - Midnight Spur: Voxel / Minecraft-Style 3D Western Duel Engine
+// render.js - Midnight Spur: Voxel 3D Western Engine (Forward Sightline Revolver Fix)
 import * as THREE from 'three';
 
 export function createRenderer(canvas) {
@@ -14,10 +14,10 @@ export function createRenderer(canvas) {
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
     renderer.setSize(canvas.width, canvas.height, false);
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.BasicShadowMap; // Crisp blocky voxel shadows
+    renderer.shadowMap.type = THREE.BasicShadowMap;
 
     // 2. Bright Voxel Sunlight
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
     scene.add(ambientLight);
 
     const sunLight = new THREE.DirectionalLight(0xfffaea, 1.4);
@@ -29,14 +29,14 @@ export function createRenderer(canvas) {
     scene.add(sunLight);
 
     const playerMuzzleLight = new THREE.PointLight(0xffaa22, 0, 8);
-    playerMuzzleLight.position.set(-1.1, 1.05, 0.4);
+    playerMuzzleLight.position.set(-0.8, 1.15, 0.4);
     scene.add(playerMuzzleLight);
 
     const opponentMuzzleLight = new THREE.PointLight(0xffaa22, 0, 8);
-    opponentMuzzleLight.position.set(1.1, 1.05, 0.4);
+    opponentMuzzleLight.position.set(0.8, 1.15, 0.4);
     scene.add(opponentMuzzleLight);
 
-    // 3. Voxel Chunk Ground (Terracotta Sand & Wood Planks)
+    // 3. Voxel Chunk Ground
     const blockMat = (color) => new THREE.MeshLambertMaterial({ color, flatShading: true });
 
     const groundGeo = new THREE.BoxGeometry(40, 2, 20);
@@ -52,7 +52,7 @@ export function createRenderer(canvas) {
     boardwalk.castShadow = true;
     scene.add(boardwalk);
 
-    // 4. Voxel Town Architecture (Modular Blocks)
+    // 4. Voxel Town Architecture
     const townGroup = new THREE.Group();
     scene.add(townGroup);
 
@@ -71,7 +71,6 @@ export function createRenderer(canvas) {
         cornice.castShadow = true;
         group.add(cornice);
 
-        // Windows & Door Blocks
         const door = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.8, 0.1), blockMat(0x3e2412));
         door.position.set(0, 0.9, d / 2 + 0.05);
         group.add(door);
@@ -85,13 +84,13 @@ export function createRenderer(canvas) {
         townGroup.add(group);
     }
 
-    buildVoxelHouse(-6.2, -2.8, 3.8, 4.2, 2.4, 0x8a2c1a, 0x54180c); // Red Saloon
-    buildVoxelHouse(-2.6, -3.0, 2.8, 3.2, 2.2, 0x6e4428, 0x3d2414); // Sheriff Jail
-    buildVoxelHouse(0.8, -3.2, 3.2, 4.4, 2.4, 0x6c7482, 0x484e5a);  // Stone Bank
-    buildVoxelHouse(4.2, -3.0, 3.0, 3.4, 2.2, 0x94643a, 0x5a3a1e);  // General Store
-    buildVoxelHouse(7.8, -2.8, 3.6, 4.6, 2.4, 0xb88452, 0x6a4828);  // Grand Hotel
+    buildVoxelHouse(-6.2, -2.8, 3.8, 4.2, 2.4, 0x8a2c1a, 0x54180c);
+    buildVoxelHouse(-2.6, -3.0, 2.8, 3.2, 2.2, 0x6e4428, 0x3d2414);
+    buildVoxelHouse(0.8, -3.2, 3.2, 4.4, 2.4, 0x6c7482, 0x484e5a);
+    buildVoxelHouse(4.2, -3.0, 3.0, 3.4, 2.2, 0x94643a, 0x5a3a1e);
+    buildVoxelHouse(7.8, -2.8, 3.6, 4.6, 2.4, 0xb88452, 0x6a4828);
 
-    // 5. Authentic Minecraft Humanoid Character Factory
+    // 5. Minecraft Humanoid Rig
     function createVoxelCowboy(isHero = false) {
         const root = new THREE.Group();
 
@@ -102,8 +101,8 @@ export function createRenderer(canvas) {
             accent: blockMat(isHero ? 0xb8281e : 0xe8cf8c),
             pants: blockMat(isHero ? 0x161820 : 0x2c4468),
             boots: blockMat(0x1a120c),
-            gun: blockMat(0x30343e),
-            silver: blockMat(0xf0f0fa),
+            gunSteel: blockMat(0x282c38),
+            gunSilver: blockMat(0xd4d8e4),
             gold: blockMat(0xf2be34),
             hair: blockMat(isHero ? 0x1e120c : 0x482a16),
             pupil: blockMat(0x111118),
@@ -112,8 +111,7 @@ export function createRenderer(canvas) {
             cigarTip: new THREE.MeshBasicMaterial({ color: 0xff4411 }),
         };
 
-        // Standard Minecraft Dimensions (Scale 1 unit ~ 1.8m tall)
-        // Legs: 4x12x4 pixels (0.24w, 0.72h, 0.24d)
+        // Legs
         function createVoxelLeg(xOffset) {
             const legGroup = new THREE.Group();
             legGroup.position.set(xOffset, 0.72, 0);
@@ -136,7 +134,7 @@ export function createRenderer(canvas) {
         root.legL = legL;
         root.legR = legR;
 
-        // Torso: 8x12x4 pixels (0.48w, 0.72h, 0.24d)
+        // Torso
         const torsoGroup = new THREE.Group();
         torsoGroup.position.set(0, 0.72, 0);
 
@@ -145,14 +143,17 @@ export function createRenderer(canvas) {
         torsoMesh.castShadow = true;
         torsoGroup.add(torsoMesh);
 
-        // Belt & Buckle
+        // Belt & Holster
         const belt = new THREE.Mesh(new THREE.BoxGeometry(0.49, 0.08, 0.25), blockMat(0x3a1a0c));
         belt.position.y = 0.08;
         const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.09, 0.26), root.mats.gold);
         buckle.position.y = 0.08;
-        torsoGroup.add(belt, buckle);
 
-        // Bandana / Poncho Layer
+        const holster = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.22, 0.12), blockMat(0x281208));
+        holster.position.set(0.25, 0.04, 0);
+        holster.rotation.z = -0.15;
+        torsoGroup.add(belt, buckle, holster);
+
         const overlay = new THREE.Mesh(new THREE.BoxGeometry(0.495, 0.26, 0.255), root.mats.accent);
         overlay.position.y = 0.54;
         torsoGroup.add(overlay);
@@ -161,7 +162,7 @@ export function createRenderer(canvas) {
         root.add(torsoGroup);
         root.torsoGroup = torsoGroup;
 
-        // Head: 8x8x8 pixels (0.48w, 0.48h, 0.48d)
+        // Head
         const headGroup = new THREE.Group();
         headGroup.position.set(0, 1.44, 0);
 
@@ -170,7 +171,6 @@ export function createRenderer(canvas) {
         headMesh.castShadow = true;
         headGroup.add(headMesh);
 
-        // Blocky Pixel Eyes
         function createPixelEye(x) {
             const eye = new THREE.Group();
             eye.position.set(x, 0.24, 0.235);
@@ -182,13 +182,12 @@ export function createRenderer(canvas) {
         }
         headGroup.add(createPixelEye(-0.12), createPixelEye(0.12));
 
-        // Pixel Mustache
         const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.06, 0.02), root.mats.hair);
         mustache.position.set(0, 0.12, 0.24);
         headGroup.add(mustache);
         root.mustache = mustache;
 
-        // Cowboy Hat (Flat Voxel Brim + Crown)
+        // Hat
         const hatGroup = new THREE.Group();
         hatGroup.position.set(0, 0.46, 0);
 
@@ -207,14 +206,12 @@ export function createRenderer(canvas) {
         root.hatGroup = hatGroup;
         root.hatBrim = brim;
 
-        // Hatless Hair Layer (For El Indio)
         const hairLayer = new THREE.Mesh(new THREE.BoxGeometry(0.49, 0.24, 0.49), root.mats.hair);
         hairLayer.position.set(0, 0.36, -0.01);
         hairLayer.visible = false;
         headGroup.add(hairLayer);
         root.hairLayer = hairLayer;
 
-        // Voxel Cigarillo (For Blondie)
         const cigarGroup = new THREE.Group();
         cigarGroup.position.set(0.08, 0.08, 0.26);
         const cigarBody = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.14), root.mats.cigar);
@@ -228,7 +225,6 @@ export function createRenderer(canvas) {
         root.add(headGroup);
         root.headGroup = headGroup;
 
-        // Arms: 4x12x4 pixels (0.24w, 0.72h, 0.24d)
         // Left Resting Arm
         const armLeftGroup = new THREE.Group();
         armLeftGroup.position.set(-0.36, 1.38, 0);
@@ -239,7 +235,7 @@ export function createRenderer(canvas) {
         armLeftGroup.add(armLeftMesh);
         root.add(armLeftGroup);
 
-        // Right Gun Arm (Pivot at shoulder)
+        // Right Arm
         const armRightGroup = new THREE.Group();
         armRightGroup.position.set(0.36, 1.38, 0);
 
@@ -248,23 +244,55 @@ export function createRenderer(canvas) {
         armRightMesh.castShadow = true;
         armRightGroup.add(armRightMesh);
 
-        // Voxel Revolver (Held firmly in right hand)
-        const gun = new THREE.Group();
-        gun.position.set(0, -0.60, 0.18);
+        // Hand Flesh Tip
+        const handTip = new THREE.Mesh(new THREE.BoxGeometry(0.242, 0.16, 0.242), root.mats.skin);
+        handTip.position.y = -0.58;
+        armRightGroup.add(handTip);
 
-        const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.32), root.mats.gun);
-        barrel.position.set(0, 0.06, 0.08);
+        // Bold Voxel Single Action Revolver
+        // Correctly oriented so when the arm raises, the barrel aims straight forward along the duel line
+        const gun = new THREE.Group();
+        gun.position.set(0, -0.62, 0.10);
+        gun.rotation.x = Math.PI / 2; // Aligns barrel along the arm's pointing direction
+
+        // 1. Long Heavy Octagonal Barrel
+        const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.44), root.mats.gunSteel);
+        barrel.position.set(0, 0.05, 0.22);
         barrel.castShadow = true;
 
-        const grip = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 0.08), blockMat(0x4a2410));
-        grip.position.set(0, -0.04, -0.06);
+        // 2. Raised Iron Sight
+        const sight = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.04, 0.04), root.mats.gunSilver);
+        sight.position.set(0, 0.10, 0.40);
+
+        // 3. 6-Shot Revolver Cylinder
+        const cylinder = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.16), root.mats.gunSilver);
+        cylinder.position.set(0, 0.04, 0.04);
+        cylinder.castShadow = true;
+
+        // 4. Solid Steel Receiver Frame
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.12, 0.18), root.mats.gunSteel);
+        frame.position.set(0, 0.03, -0.05);
+
+        // 5. Cocked Hammer
+        const hammer = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.06, 0.05), root.mats.gunSilver);
+        hammer.position.set(0, 0.11, -0.12);
+
+        // 6. Trigger Guard
+        const triggerGuard = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.06, 0.08), root.mats.gunSteel);
+        triggerGuard.position.set(0, -0.06, -0.02);
+
+        // 7. Flared Walnut Grip (Angled backward)
+        const grip = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.20, 0.09), blockMat(0x4a2410));
+        grip.position.set(0, -0.10, -0.10);
+        grip.rotation.x = -0.38;
         grip.castShadow = true;
 
-        gun.add(barrel, grip);
+        gun.add(barrel, sight, cylinder, frame, hammer, triggerGuard, grip);
         armRightGroup.add(gun);
 
         root.add(armRightGroup);
         root.armRightGroup = armRightGroup;
+        root.gun = gun;
 
         return root;
     }
@@ -279,29 +307,35 @@ export function createRenderer(canvas) {
     opponent.rotation.y = -Math.PI / 2.5;
     scene.add(opponent);
 
-    // 6. Voxel Tumbleweed
-    const twMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(0.45, 0.45, 0.45),
-        blockMat(0xc48c48)
+    // 6. Circular 3D Tumbleweed
+    const twGroup = new THREE.Group();
+    const twCore = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(0.24, 1),
+        new THREE.MeshLambertMaterial({ color: 0x8c5828, wireframe: true })
     );
-    twMesh.castShadow = true;
-    twMesh.position.set(0, 0.25, 0.8);
-    scene.add(twMesh);
+    const twFibers = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(0.28, 1),
+        new THREE.MeshLambertMaterial({ color: 0xd4944c, wireframe: true })
+    );
+    twGroup.add(twCore, twFibers);
+    twGroup.castShadow = true;
+    twGroup.position.set(0, 0.28, 0.8);
+    scene.add(twGroup);
 
-    // 7. Voxel Sky Tiers
+    // 7. Sky Tiers
     function updateVoxelSky(round = 1) {
         if (round <= 5) {
-            scene.background.setHex(0x60a8e8); // Day Sky Blue
+            scene.background.setHex(0x60a8e8);
             scene.fog.color.setHex(0x60a8e8);
             sunLight.color.setHex(0xfffaea);
             sunLight.intensity = 1.4;
         } else if (round <= 12) {
-            scene.background.setHex(0xb84424); // Sunset Orange
+            scene.background.setHex(0xb84424);
             scene.fog.color.setHex(0xb84424);
             sunLight.color.setHex(0xffaa44);
             sunLight.intensity = 1.3;
         } else {
-            scene.background.setHex(0x0e1424); // Night Navy
+            scene.background.setHex(0x0e1424);
             scene.fog.color.setHex(0x0e1424);
             sunLight.color.setHex(0x7799cc);
             sunLight.intensity = 0.7;
@@ -348,6 +382,7 @@ export function createRenderer(canvas) {
     }
 
     let clock = 0;
+    const xAxis = new THREE.Vector3(1, 0, 0);
 
     return {
         render(state) {
@@ -369,32 +404,46 @@ export function createRenderer(canvas) {
             }
             camera.lookAt(0, 1.0, 0);
 
-            // 2. Minecraft-Style Idle Breathing & Hand Trembles
+            // 2. Idle Tension Hand Hover
+            const tension = state.tension || 0;
+
             if (!state.playerHasDrawn && state.playerDeathProgress === 0) {
-                player.armRightGroup.rotation.x = Math.sin(clock * 3.5) * 0.05;
+                const jitter = Math.sin(clock * (4 + tension * 10)) * (0.02 + tension * 0.04);
+                player.armRightGroup.rotation.x = 0.18 + jitter;
+                player.armRightGroup.rotation.z = -0.08;
                 player.headGroup.rotation.y = Math.sin(clock * 1.5) * 0.03;
             }
 
             if (!state.opponentHasDrawn && state.opponentDeathProgress === 0) {
-                opponent.armRightGroup.rotation.x = Math.cos(clock * 3.2) * 0.05;
+                const jitter = Math.cos(clock * (4 + tension * 10)) * (0.02 + tension * 0.04);
+                opponent.armRightGroup.rotation.x = 0.18 + jitter;
+                opponent.armRightGroup.rotation.z = -0.08;
                 opponent.headGroup.rotation.y = Math.cos(clock * 1.4) * 0.03;
             }
 
-            // 3. Minecraft 90-Degree Quick-Draw Arm Snap
+            // 3. Quick-Draw Snap + Recoil Kick
             if (state.playerHasDrawn) {
-                player.armRightGroup.rotation.x = THREE.MathUtils.lerp(player.armRightGroup.rotation.x, -Math.PI / 2, 0.5);
+                const recoil = state.muzzleFlash && state.muzzleFlash.player > 0 ? -0.22 : 0;
+                player.armRightGroup.rotation.x = THREE.MathUtils.lerp(player.armRightGroup.rotation.x, -Math.PI / 2 + recoil, 0.55);
+                player.armRightGroup.rotation.z = 0;
             }
 
             if (state.opponentHasDrawn) {
-                opponent.armRightGroup.rotation.x = THREE.MathUtils.lerp(opponent.armRightGroup.rotation.x, -Math.PI / 2, 0.5);
+                const recoil = state.muzzleFlash && state.muzzleFlash.opponent > 0 ? -0.22 : 0;
+                opponent.armRightGroup.rotation.x = THREE.MathUtils.lerp(opponent.armRightGroup.rotation.x, -Math.PI / 2 + recoil, 0.55);
+                opponent.armRightGroup.rotation.z = 0;
             }
 
-            // 4. Authentic Minecraft KO Fall (Tilts onto side with a blocky thud)
+            // 4. True Local-Axis Backward Knockback Fall
             if (state.playerDeathProgress > 0) {
                 const t = state.playerDeathProgress;
-                player.position.x = -1.4 - t * 0.3;
-                player.rotation.z = t * (Math.PI / 2);
-                player.position.y = THREE.MathUtils.lerp(0, 0.12, t);
+                player.rotation.set(0, Math.PI / 2.5, 0);
+                player.rotateOnAxis(xAxis, -t * (Math.PI / 2.05));
+                player.position.set(
+                    -1.4 - Math.sin(Math.PI / 2.5) * (t * 0.45),
+                    THREE.MathUtils.lerp(0, 0.18, t),
+                    -Math.cos(Math.PI / 2.5) * (t * 0.45)
+                );
             } else {
                 player.position.set(-1.4, 0, 0);
                 player.rotation.set(0, Math.PI / 2.5, 0);
@@ -402,26 +451,30 @@ export function createRenderer(canvas) {
 
             if (state.opponentDeathProgress > 0) {
                 const t = state.opponentDeathProgress;
-                opponent.position.x = 1.4 + t * 0.3;
-                opponent.rotation.z = -t * (Math.PI / 2);
-                opponent.position.y = THREE.MathUtils.lerp(0, 0.12, t);
+                opponent.rotation.set(0, -Math.PI / 2.5, 0);
+                opponent.rotateOnAxis(xAxis, -t * (Math.PI / 2.05));
+                opponent.position.set(
+                    1.4 + Math.sin(Math.PI / 2.5) * (t * 0.45),
+                    THREE.MathUtils.lerp(0, 0.18, t),
+                    -Math.cos(Math.PI / 2.5) * (t * 0.45)
+                );
             } else {
                 opponent.position.set(1.4, 0, 0);
                 opponent.rotation.set(0, -Math.PI / 2.5, 0);
             }
 
-            // 5. Blocky Tumbleweed Rotation
+            // 5. Circular Tumbleweed Rolling & Bouncing
             if (state.tumbleweed && state.tumbleweed.active) {
-                twMesh.visible = true;
-                twMesh.position.x = ((state.tumbleweed.x / canvas.width) - 0.5) * 8.5;
-                twMesh.position.y = 0.25 + Math.abs(Math.sin((state.tumbleweed.bouncePhase || 0))) * 0.25;
-                twMesh.rotation.z -= 0.08;
-                twMesh.rotation.y += 0.04;
+                twGroup.visible = true;
+                twGroup.position.x = ((state.tumbleweed.x / canvas.width) - 0.5) * 8.5;
+                twGroup.position.y = 0.28 + Math.abs(Math.sin((state.tumbleweed.bouncePhase || 0))) * 0.22;
+                twGroup.rotation.z = -(state.tumbleweed.rotation || 0);
+                twGroup.rotation.y += 0.03;
             } else {
-                twMesh.visible = false;
+                twGroup.visible = false;
             }
 
-            // 6. Muzzle Flash Point Lights
+            // 6. Dynamic Muzzle Flash Point Lights
             if (state.muzzleFlash) {
                 playerMuzzleLight.intensity = state.muzzleFlash.player > 0 ? 8 : 0;
                 opponentMuzzleLight.intensity = state.muzzleFlash.opponent > 0 ? 8 : 0;
