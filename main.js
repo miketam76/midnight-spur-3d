@@ -1,4 +1,4 @@
-// main.js
+// main.js - Midnight Spur 3D Controller & Input Router
 import { createGame } from './game.js';
 
 const dom = {
@@ -35,6 +35,8 @@ const dom = {
     prevCharBtn: document.getElementById('prevCharBtn'),
     nextCharBtn: document.getElementById('nextCharBtn'),
     confirmCharBtn: document.getElementById('confirmCharBtn'),
+    timerTrack: document.getElementById('timerTrack'),
+    timerFill: document.getElementById('timerFill'),
 };
 
 const game = createGame(dom);
@@ -61,7 +63,7 @@ dom.muteButton.addEventListener('click', () => {
     dom.muteButton.textContent = isMuted ? 'Unmute' : 'Mute';
 });
 
-// Any pointer click or touch during Attract Demo or Scores interrupts and returns to Title
+// Pointer Interrupt
 window.addEventListener('pointerdown', (e) => {
     if (!e.target.closest('button')) {
         game.handleAttractInterrupt();

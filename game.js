@@ -1,4 +1,4 @@
-// game.js - Midnight Spur (Attract Mode, Full Pause & Cumulative Bounty Ranking)
+// game.js - Midnight Spur (Attract Mode, 3D Engine, Full Pause & Cumulative Bounty Ranking)
 import { createAudioSystem } from './audio.js';
 import { createRenderer } from './render.js';
 
@@ -116,19 +116,6 @@ export function createGame(dom) {
         return state.phase === phases.countdown || state.phase === phases.duel || state.phase === phases.roundWin;
     }
 
-    function updateDust() {
-        if (!state.dustParticles) return;
-        const tierMultiplier = state.round > 12 ? 1.8 : (state.round > 5 ? 1.3 : 1.0);
-
-        state.dustParticles.forEach((p) => {
-            p.x += p.speed * tierMultiplier;
-            if (p.x > canvas.width + 10) {
-                p.x = -10;
-                p.y = canvas.height * 0.45 + Math.random() * (canvas.height * 0.50);
-            }
-        });
-    }
-
     function updateTumbleweed() {
         const tw = state.tumbleweed;
         if (!tw) return;
@@ -143,7 +130,6 @@ export function createGame(dom) {
                 tw.x = -40;
                 tw.y = Math.floor(canvas.height * 0.76) + Math.random() * 12;
 
-                // Speed scales up in Sunset (Tier 2) and Night (Tier 3)
                 const baseSpeed = 1.6 + Math.random() * 1.0;
                 tw.vx = baseSpeed * (isLateGame ? 1.5 : (isMidGame ? 1.25 : 1.0));
 
@@ -154,14 +140,10 @@ export function createGame(dom) {
             tw.x += tw.vx;
             tw.rotation += 0.07 * (tw.vx / 1.6);
             tw.bouncePhase += 0.055;
-
-            // Scaled bounce arc height for the larger mass
             tw.currentY = tw.y - Math.abs(Math.sin(tw.bouncePhase) * 11);
 
             if (tw.x > canvas.width + 50) {
                 tw.active = false;
-
-                // Tighter delay between tumbleweeds in later rounds
                 const minDelay = isLateGame ? 60 : (isMidGame ? 110 : 180);
                 const variance = isLateGame ? 80 : 160;
                 tw.timer = minDelay + Math.floor(Math.random() * variance);
@@ -241,11 +223,11 @@ export function createGame(dom) {
 
     function setStatus(message) {
         state.baseStatus = message;
-        dom.statusText.textContent = message;
+        if (dom.statusText) dom.statusText.textContent = message;
     }
 
     function setPausedStatus() {
-        dom.statusText.textContent = 'Paused. Tap Resume to continue.';
+        if (dom.statusText) dom.statusText.textContent = 'Paused. Tap Resume to continue.';
     }
 
     function resetDeathStates() {
@@ -293,7 +275,7 @@ export function createGame(dom) {
 
         state.isPaused = false;
         state.pauseStartedAt = 0;
-        dom.statusText.textContent = state.baseStatus;
+        if (dom.statusText) dom.statusText.textContent = state.baseStatus;
         syncControls();
     }
 
@@ -480,6 +462,8 @@ export function createGame(dom) {
         showScreen(phases.menu);
         syncHud();
 
+        if (dom.timerTrack) dom.timerTrack.hidden = true;
+
         if (playGunshot) {
             audio.playDraw();
         }
@@ -534,7 +518,6 @@ export function createGame(dom) {
             state.opponentDeathProgress = clamp(state.opponentDeathProgress + 0.035, 0, 1);
         }
 
-        updateDust();
         updateTumbleweed();
 
         if (state.pendingTransition && now >= state.pendingTransitionAt) {
@@ -549,6 +532,14 @@ export function createGame(dom) {
             state.progress = state.tension;
             state.countdownProgress = clamp(1 - state.tension, 0, 1);
 
+            // Drive 3D Countdown Tension Bar UI
+            if (dom.timerFill) {
+                dom.timerFill.style.width = `${(state.countdownProgress * 100).toFixed(1)}%`;
+            }
+            if (dom.timerTrack) {
+                dom.timerTrack.hidden = false;
+            }
+
             if (!state.lastTickTime || now - state.lastTickTime > Math.max(180, 500 * (1 - state.tension))) {
                 state.lastTickTime = now;
                 audio.playTick(1.0 + state.tension * 0.5);
@@ -558,7 +549,8 @@ export function createGame(dom) {
                 audio.stopMusic();
             }
 
-            state.phaseLabel = timeUntilDraw > 0 ? `DRAW IN ${Math.max(0, Math.ceil(timeUntilDraw / 1000))}` : 'DRAW';
+            state.phaseLabel = timeUntilDraw > 0 ? `WAIT FOR IT... (${Math.max(0, Math.ceil(timeUntilDraw / 1000))})` : 'DRAW!';
+            setStatus(state.phaseLabel);
 
             if (timeUntilDraw <= 0) {
                 state.phase = phases.duel;
@@ -566,9 +558,17 @@ export function createGame(dom) {
                 state.playerReady = true;
                 state.opponentReady = true;
                 state.phaseLabel = 'DRAW!';
+                setStatus('DRAW!');
                 audio.playSignal();
             }
-        } else if (state.phase === phases.duel) {
+        } else {
+            // Hide the meter in other phases
+            if (dom.timerTrack && state.phase !== phases.duel) {
+                dom.timerTrack.hidden = true;
+            }
+        }
+
+        if (state.phase === phases.duel) {
             const duelElapsed = now - state.duelStartedAt;
             const opponentDelay = state.currentOutlaw.currentDelay;
 

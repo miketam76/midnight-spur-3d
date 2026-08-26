@@ -273,8 +273,29 @@ canvas {
     border: 1px solid rgba(244, 227, 193, 0.12);
     box-shadow: 0 22px 56px rgba(0, 0, 0, 0.4);
     background: #070b14;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+}
+
+/* 3D Countdown Tension Bar */
+.timer-track {
+    position: absolute;
+    top: 62px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(56%, 520px);
+    height: 14px;
+    background: #100806;
+    border: 3px solid #2a1408;
+    box-shadow: 0 0 0 2px #000000, 0 4px 10px rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+    z-index: 4;
+    overflow: hidden;
+}
+
+.timer-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(180deg, #fff4cc 0%, #e8aa34 40%, #b86c14 80%, #6c3808 100%);
+    transition: width 40ms linear;
 }
 
 .status-banner {
@@ -288,8 +309,6 @@ canvas {
     width: min(100%, 960px);
     margin: 0 auto;
     text-align: center;
-
-    /* Lock container height so text never pushes the layout */
     min-height: 48px;
     display: flex;
     align-items: center;
@@ -349,8 +368,6 @@ canvas {
     margin-top: 10px;
 }
 
-/* --- ARCADE ATTRACT MODE, HIGH SCORES & INITIALS STYLES --- */
-
 .arcade-insert-coin {
     margin-top: 18px;
     font-family: "Press Start 2P", monospace;
@@ -374,8 +391,7 @@ canvas {
 
 .demo-marquee {
     position: absolute;
-    top: 72px;
-    /* Clears the status banner and floats over the top of the canvas */
+    top: 86px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 5;
@@ -482,7 +498,6 @@ canvas {
     flex: 1;
 }
 
-/* Mobile Unified Portrait Layout (<= 720px) */
 @media (max-width: 720px) {
     .app-shell {
         padding: 8px;
@@ -581,13 +596,11 @@ canvas {
     }
 }
 
-/* Extra Tight Viewports (<= 480px) */
 @media (max-width: 480px) {
     .status-banner {
         width: 100%;
         min-width: 0;
         min-height: 46px;
-        /* Holds 2 full lines of retro text comfortably */
         padding: 4px 10px;
     }
 
@@ -596,8 +609,7 @@ canvas {
         line-height: 1.35;
     }
 
-    canvas,
-    .canvas-container {
+    canvas {
         max-height: 48vh;
         aspect-ratio: 4 / 3;
     }
@@ -637,28 +649,8 @@ canvas {
     }
 
     .demo-marquee {
-        top: 64px;
+        top: 72px;
         font-size: 0.70rem;
         padding: 4px 10px;
-    }
-}
-
-/* Mobile Landscape Emergency Override */
-@media (max-height: 500px) {
-    canvas {
-        max-height: 28vh;
-    }
-
-    .draw-button {
-        min-height: 48px;
-        font-size: 0.85rem;
-    }
-
-    .utility-button {
-        min-height: 38px;
-    }
-
-    .status-banner {
-        padding: 4px 8px;
     }
 }
