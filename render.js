@@ -1,11 +1,11 @@
-// render.js - Midnight Spur: Voxel 3D Western Engine (Dynamic Outlaw Face Wanted Posters)
+// render.js - Midnight Spur: Western Standoff Environment (Architectural False-Fronts & Atmosphere)
 import * as THREE from 'three';
 
 export function createRenderer(canvas) {
-    // 1. Scene & Retro Voxel Sky Setup
+    // 1. Scene & Atmosphere Setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x60a8e8);
-    scene.fog = new THREE.Fog(0x60a8e8, 14, 38);
+    scene.background = new THREE.Color(0x629de0);
+    scene.fog = new THREE.FogExp2(0x8ebcf0, 0.038);
 
     const aspect = canvas.width / canvas.height;
     const fov = aspect < 1.0 ? 52 : (aspect < 1.4 ? 44 : 36);
@@ -18,17 +18,23 @@ export function createRenderer(canvas) {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.BasicShadowMap;
 
-    // 2. Lighting Setup
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+    const blockMat = (color) => new THREE.MeshLambertMaterial({ color, flatShading: true });
+
+    // 2. Dynamic Lighting & Desert Haze
+    const ambientLight = new THREE.AmbientLight(0xf4e6d0, 0.85);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfffaea, 1.4);
-    sunLight.position.set(10, 18, 10);
+    const sunLight = new THREE.DirectionalLight(0xfff1dc, 1.55);
+    sunLight.position.set(12, 18, 9);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 1024;
     sunLight.shadow.mapSize.height = 1024;
     sunLight.shadow.bias = -0.001;
     scene.add(sunLight);
+
+    const rimLight = new THREE.DirectionalLight(0xd67a48, 0.6);
+    rimLight.position.set(-10, 6, -8);
+    scene.add(rimLight);
 
     const playerMuzzleLight = new THREE.PointLight(0xffaa22, 0, 10);
     playerMuzzleLight.position.set(-2.2, 1.15, 0.4);
@@ -38,61 +44,136 @@ export function createRenderer(canvas) {
     opponentMuzzleLight.position.set(2.2, 1.15, 0.4);
     scene.add(opponentMuzzleLight);
 
-    // 3. Ground & Extended Boardwalk
-    const blockMat = (color) => new THREE.MeshLambertMaterial({ color, flatShading: true });
-
-    const groundGeo = new THREE.BoxGeometry(48, 2, 24);
+    // 3. Ground, Main Dirt Road & Layered Boardwalk
+    const groundGeo = new THREE.BoxGeometry(54, 2, 28);
     const ground = new THREE.Mesh(groundGeo, blockMat(0xbe783c));
     ground.position.set(0, -1, 0);
     ground.receiveShadow = true;
     scene.add(ground);
 
-    const boardwalkGeo = new THREE.BoxGeometry(32, 0.3, 2.2);
-    const boardwalk = new THREE.Mesh(boardwalkGeo, blockMat(0x8a5c36));
-    boardwalk.position.set(0, 0.15, -1.5);
-    boardwalk.receiveShadow = true;
-    boardwalk.castShadow = true;
-    scene.add(boardwalk);
+    const boardwalkGroup = new THREE.Group();
+    const mainWalk = new THREE.Mesh(new THREE.BoxGeometry(34, 0.28, 2.4), blockMat(0x845630));
+    mainWalk.position.set(0, 0.14, -1.5);
+    mainWalk.receiveShadow = true;
+    mainWalk.castShadow = true;
+    boardwalkGroup.add(mainWalk);
 
-    // 4. Spread Voxel Town Buildings
+    // Planks & Edge Lip
+    const walkLip = new THREE.Mesh(new THREE.BoxGeometry(34.2, 0.32, 0.12), blockMat(0x5a361a));
+    walkLip.position.set(0, 0.14, -0.3);
+    boardwalkGroup.add(walkLip);
+    scene.add(boardwalkGroup);
+
+    // 4. Western Town Buildings with False Fronts & Saloon Architecture
     const townGroup = new THREE.Group();
     scene.add(townGroup);
 
-    function buildVoxelHouse(x, z, w, h, d, wallCol, roofCol) {
+    function buildSaloonBuilding(x, z, w, h, d, wallCol, trimCol, isSaloon = false) {
         const group = new THREE.Group();
         group.position.set(x, 0, z);
 
+        // Main Wall Block
         const wall = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), blockMat(wallCol));
         wall.position.y = h / 2;
         wall.castShadow = true;
         wall.receiveShadow = true;
         group.add(wall);
 
-        const cornice = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.4, d + 0.4), blockMat(roofCol));
-        cornice.position.set(0, h + 0.2, 0);
+        // Stepped Boomtown Parapet / False Front
+        const falseFront = new THREE.Mesh(new THREE.BoxGeometry(w + 0.15, 0.9, 0.18), blockMat(wallCol));
+        falseFront.position.set(0, h + 0.45, d / 2 - 0.06);
+        falseFront.castShadow = true;
+        group.add(falseFront);
+
+        const pediment = new THREE.Mesh(new THREE.BoxGeometry(w * 0.55, 0.5, 0.2), blockMat(trimCol));
+        pediment.position.set(0, h + 0.95, d / 2 - 0.05);
+        pediment.castShadow = true;
+        group.add(pediment);
+
+        const cornice = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.25, d + 0.3), blockMat(trimCol));
+        cornice.position.set(0, h + 0.12, 0);
         cornice.castShadow = true;
         group.add(cornice);
 
-        const door = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.8, 0.1), blockMat(0x3e2412));
-        door.position.set(0, 0.9, d / 2 + 0.05);
-        group.add(door);
+        // Overhanging Porch / Awning
+        const awningRoof = new THREE.Mesh(new THREE.BoxGeometry(w + 0.3, 0.12, 1.3), blockMat(trimCol));
+        awningRoof.position.set(0, 2.55, d / 2 + 0.65);
+        awningRoof.rotation.x = 0.08;
+        awningRoof.castShadow = true;
+        group.add(awningRoof);
 
-        [-w * 0.3, w * 0.3].forEach((wx) => {
-            const win = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.9, 0.1), blockMat(0x223344));
-            win.position.set(wx, 1.4, d / 2 + 0.05);
-            group.add(win);
+        // Awning Support Posts
+        [-w * 0.44, w * 0.44].forEach((px) => {
+            const post = new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.5, 0.12), blockMat(0x482a14));
+            post.position.set(px, 1.25, d / 2 + 1.22);
+            post.castShadow = true;
+            group.add(post);
         });
+
+        // Hitching Rail
+        const hitchRail = new THREE.Mesh(new THREE.BoxGeometry(w * 0.7, 0.08, 0.08), blockMat(0x3e2210));
+        hitchRail.position.set(0, 0.75, d / 2 + 1.35);
+        const hPostL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.75, 0.08), blockMat(0x3e2210));
+        hPostL.position.set(-w * 0.32, 0.375, d / 2 + 1.35);
+        const hPostR = hPostL.clone();
+        hPostR.position.set(w * 0.32, 0.375, d / 2 + 1.35);
+        group.add(hitchRail, hPostL, hPostR);
+
+        // Doors & Windows
+        if (isSaloon) {
+            // Batwing Swinging Doors
+            const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.9, 0.1), blockMat(0x28160a));
+            doorFrame.position.set(0, 0.95, d / 2 + 0.04);
+            const batL = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.85, 0.06), blockMat(0x8e5224));
+            batL.position.set(-0.23, 1.05, d / 2 + 0.1);
+            batL.rotation.y = 0.25;
+            const batR = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.85, 0.06), blockMat(0x8e5224));
+            batR.position.set(0.23, 1.05, d / 2 + 0.1);
+            batR.rotation.y = -0.25;
+            group.add(doorFrame, batL, batR);
+        } else {
+            const door = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.8, 0.08), blockMat(0x2c170a));
+            door.position.set(0, 0.9, d / 2 + 0.05);
+            group.add(door);
+        }
+
+        [-w * 0.28, w * 0.28].forEach((wx) => {
+            const winFrame = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.95, 0.12), blockMat(0x24160e));
+            winFrame.position.set(wx, 1.45, d / 2 + 0.05);
+            const winGlass = new THREE.Mesh(new THREE.BoxGeometry(0.60, 0.82, 0.13), blockMat(0x182434));
+            winGlass.position.set(wx, 1.45, d / 2 + 0.05);
+            group.add(winFrame, winGlass);
+
+            // Upper Floor Windows
+            if (h >= 3.8) {
+                const winUp = winFrame.clone();
+                winUp.position.set(wx, h - 0.9, d / 2 + 0.05);
+                group.add(winUp);
+            }
+        });
+
+        // Barrels & Supply Crates
+        if (Math.abs(x) > 2) {
+            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.65, 8), blockMat(0x56341a));
+            barrel.position.set(w * 0.44 + (x > 0 ? 0.35 : -0.35), 0.325, d / 2 + 0.7);
+            barrel.castShadow = true;
+            const crate = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.45, 0.5), blockMat(0x764c28));
+            crate.position.set(barrel.position.x, 0.225, d / 2 + 0.1);
+            crate.castShadow = true;
+            group.add(barrel, crate);
+        }
 
         townGroup.add(group);
     }
 
-    buildVoxelHouse(-7.4, -2.8, 3.8, 4.2, 2.4, 0x8a2c1a, 0x54180c);
-    buildVoxelHouse(-3.6, -3.0, 2.8, 3.2, 2.2, 0x6e4428, 0x3d2414);
-    buildVoxelHouse(0.0, -3.2, 3.4, 4.4, 2.4, 0x6c7482, 0x484e5a);
-    buildVoxelHouse(3.6, -3.0, 2.8, 3.4, 2.2, 0x94643a, 0x5a3a1e);
-    buildVoxelHouse(7.4, -2.8, 3.8, 4.6, 2.4, 0xb88452, 0x6a4828);
+    // Spawn Frontier Street
+    buildSaloonBuilding(-7.6, -3.2, 4.0, 4.2, 2.6, 0x8a2c1a, 0x54180c, false); // General Store
+    buildSaloonBuilding(-3.7, -3.4, 3.2, 3.4, 2.4, 0x6e4428, 0x3d2414, false); // Gunsmith
+    buildSaloonBuilding(0.0, -3.6, 3.8, 4.8, 2.6, 0x5a6372, 0x3c434f, true);   // Grand Saloon (Centerpiece)
+    buildSaloonBuilding(3.7, -3.4, 3.2, 3.6, 2.4, 0x94643a, 0x5a3a1e, false);  // Bank
+    buildSaloonBuilding(7.6, -3.2, 4.0, 4.4, 2.6, 0xa87848, 0x624222, false);  // Hotel & Sheriff
 
-    // 5. 3D Voxel Wanted Poster Board with Dynamic Outlaw Mugshot
+    // 5. 3D Voxel Wanted Poster Board
     const posterCanvas = document.createElement('canvas');
     posterCanvas.width = 512;
     posterCanvas.height = 700;
@@ -139,11 +220,10 @@ export function createRenderer(canvas) {
     function updateWantedPoster(outlaw) {
         if (!outlaw) return;
         const name = (outlaw.name || 'UNKNOWN OUTLAW').toUpperCase();
-        const bounty = outlaw.bounty ? `${outlaw.bounty.toLocaleString()}` : '$25,000';
+        const bounty = outlaw.bounty ? `${outlaw.bounty}` : '$25,000';
         const crime = outlaw.crime || 'TRAIN ROBBERY & MURDER';
         const outfit = outlaw.outfit || {};
 
-        // Archetype color resolution
         let skinColor = '#df9f72';
         let skinShade = '#be7e54';
         let hairColor = '#482a16';
@@ -179,18 +259,15 @@ export function createRenderer(canvas) {
             hasGoatee = true;
         }
 
-        // 1. Parchment Background Texture
         pctx.fillStyle = '#e8d4a6';
         pctx.fillRect(0, 0, 512, 700);
 
-        // Aged Border Lines
         pctx.strokeStyle = '#382012';
         pctx.lineWidth = 8;
         pctx.strokeRect(16, 16, 480, 668);
         pctx.lineWidth = 2;
         pctx.strokeRect(26, 26, 460, 648);
 
-        // 2. Star Ornaments & Headers
         pctx.fillStyle = '#382012';
         pctx.font = 'bold 34px monospace';
         pctx.textAlign = 'center';
@@ -203,77 +280,58 @@ export function createRenderer(canvas) {
 
         pctx.fillRect(40, 168, 432, 4);
 
-        // 3. Mugshot Background Frame
         pctx.fillStyle = '#cfb684';
         pctx.fillRect(76, 185, 360, 250);
         pctx.strokeStyle = '#382012';
         pctx.lineWidth = 4;
         pctx.strokeRect(76, 185, 360, 250);
 
-        // 4. Exact Outlaw Voxel Face Render (Pixel-by-Pixel Canvas Sculpt)
         const cx = 256;
         const cy = 290;
 
-        // Torso / Coat Shoulders
         drawPixelRect(cx - 88, cy + 85, 176, 60, torsoColor);
-        drawPixelRect(cx - 24, cy + 85, 48, 50, '#dedee8'); // Shirt collar
+        drawPixelRect(cx - 24, cy + 85, 48, 50, '#dedee8');
 
-        // Voxel Head & Ears
         drawPixelRect(cx - 56, cy - 25, 112, 115, skinColor);
-        drawPixelRect(cx - 68, cy + 15, 12, 35, skinColor); // Ear L
-        drawPixelRect(cx + 56, cy + 15, 12, 35, skinColor); // Ear R
-        drawPixelRect(cx - 44, cy + 30, 16, 16, skinShade); // Cheek L
-        drawPixelRect(cx + 28, cy + 30, 16, 16, skinShade); // Cheek R
+        drawPixelRect(cx - 68, cy + 15, 12, 35, skinColor);
+        drawPixelRect(cx + 56, cy + 15, 12, 35, skinColor);
+        drawPixelRect(cx - 44, cy + 30, 16, 16, skinShade);
+        drawPixelRect(cx + 28, cy + 30, 16, 16, skinShade);
 
-        // Hair / Sideburns
-        drawPixelRect(cx - 56, cy - 25, 14, 55, hairColor); // Sideburn L
-        drawPixelRect(cx + 42, cy - 25, 14, 55, hairColor); // Sideburn R
+        drawPixelRect(cx - 56, cy - 25, 14, 55, hairColor);
+        drawPixelRect(cx + 42, cy - 25, 14, 55, hairColor);
 
         if (!hasHat) {
-            // Salt & Pepper Indio Mane
             drawPixelRect(cx - 58, cy - 55, 116, 32, hairColor);
             drawPixelRect(cx - 62, cy - 25, 12, 85, hairColor);
             drawPixelRect(cx + 50, cy - 25, 12, 85, hairColor);
-            drawPixelRect(cx - 20, cy - 50, 40, 10, '#9a9ea8'); // Grey streaks
+            drawPixelRect(cx - 20, cy - 50, 40, 10, '#9a9ea8');
         }
 
-        // Piercing Eyes & Slanted Brows (Van Cleef Hawk Look)
-        drawPixelRect(cx - 38, cy + 2, 28, 7, hairColor); // Eyebrow L
-        drawPixelRect(cx + 10, cy + 2, 28, 7, hairColor); // Eyebrow R
+        drawPixelRect(cx - 38, cy + 2, 28, 7, hairColor);
+        drawPixelRect(cx + 10, cy + 2, 28, 7, hairColor);
 
-        drawPixelRect(cx - 36, cy + 12, 24, 12, '#ffffff'); // Eye White L
-        drawPixelRect(cx + 12, cy + 12, 24, 12, '#ffffff'); // Eye White R
-        drawPixelRect(cx - 28, cy + 12, 12, 12, '#111116'); // Pupil L
-        drawPixelRect(cx + 16, cy + 12, 12, 12, '#111116'); // Pupil R
+        drawPixelRect(cx - 36, cy + 12, 24, 12, '#ffffff');
+        drawPixelRect(cx + 12, cy + 12, 24, 12, '#ffffff');
+        drawPixelRect(cx - 28, cy + 12, 12, 12, '#111116');
+        drawPixelRect(cx + 16, cy + 12, 12, 12, '#111116');
 
-        // Nose (Hawk vs Wide)
         if (isHawkNose) {
             drawPixelRect(cx - 6, cy + 15, 12, 32, skinShade);
             drawPixelRect(cx - 8, cy + 42, 16, 12, skinShade);
         } else {
-            drawPixelRect(cx - 14, cy + 22, 28, 28, skinShade); // Tuco's broken nose
+            drawPixelRect(cx - 14, cy + 22, 28, 28, skinShade);
         }
 
-        // Mustache & Facial Hair
-        if (hasMustache) {
-            drawPixelRect(cx - 32, cy + 56, 64, 12, hairColor);
-        }
-
-        // Mouth Line
+        if (hasMustache) drawPixelRect(cx - 32, cy + 56, 64, 12, hairColor);
         drawPixelRect(cx - 16, cy + 70, 32, 5, '#541c14');
+        if (hasGoatee) drawPixelRect(cx - 10, cy + 75, 20, 15, hairColor);
 
-        // Goatee (Van Cleef / Man in Black)
-        if (hasGoatee) {
-            drawPixelRect(cx - 10, cy + 75, 20, 15, hairColor);
-        }
-
-        // Smoking Cheroot (The Man With No Name)
         if (hasCigar) {
             drawPixelRect(cx + 12, cy + 64, 30, 8, '#3d2010');
-            drawPixelRect(cx + 42, cy + 64, 8, 8, '#ff4411'); // Glowing tip
+            drawPixelRect(cx + 42, cy + 64, 8, 8, '#ff4411');
         }
 
-        // Hat Render (Wide Flat Brim vs Sombrero)
         if (hasHat) {
             if (isSombrero) {
                 drawPixelRect(cx - 140, cy - 30, 280, 20, hatColor);
@@ -282,11 +340,10 @@ export function createRenderer(canvas) {
             } else {
                 drawPixelRect(cx - 110, cy - 30, 220, 16, hatColor);
                 drawPixelRect(cx - 52, cy - 65, 104, 38, hatColor);
-                drawPixelRect(cx - 52, cy - 32, 104, 6, '#b8281e'); // Red band
+                drawPixelRect(cx - 52, cy - 32, 104, 6, '#b8281e');
             }
         }
 
-        // 5. Outlaw Name, Charges & Bounty Footer
         pctx.fillStyle = '#382012';
         pctx.font = '900 32px monospace';
         pctx.fillText(name, 256, 475);
@@ -304,7 +361,7 @@ export function createRenderer(canvas) {
         posterTexture.needsUpdate = true;
     }
 
-    // 6. Detailed Voxel Character & Facial Sculptor
+    // 6. Character Models & Blued-Steel Peacemaker
     function createDetailedVoxelCowboy(isHero = false) {
         const root = new THREE.Group();
 
@@ -316,19 +373,20 @@ export function createRenderer(canvas) {
             accent: blockMat(isHero ? 0xb8281e : 0xe8cf8c),
             pants: blockMat(isHero ? 0x161820 : 0x2c4468),
             boots: blockMat(0x18120c),
-            gunSteel: blockMat(0x282c38),
-            gunSilver: blockMat(0xd4d8e4),
             gold: blockMat(0xf2be34),
             hair: blockMat(isHero ? 0x1c100a : 0x482a16),
-            stubble: blockMat(isHero ? 0x9e6a48 : 0x8e5836),
             pupil: blockMat(0x0e1014),
             eyeWhite: blockMat(0xffffff),
             mouth: blockMat(0x6e281e),
             cigar: blockMat(0x482410),
             cigarTip: new THREE.MeshBasicMaterial({ color: 0xff4411 }),
+            bluedSteel: blockMat(0x1a1c22),
+            bluedSteelAccent: blockMat(0x282c36),
+            ejectorRod: blockMat(0x121418),
+            brassTrigger: blockMat(0xc49a45),
+            walnutGrip: blockMat(0x381e0e),
         };
 
-        // Legs
         function createVoxelLeg(xOffset) {
             const legGroup = new THREE.Group();
             legGroup.position.set(xOffset, 0.72, 0);
@@ -351,7 +409,6 @@ export function createRenderer(canvas) {
         root.legL = legL;
         root.legR = legR;
 
-        // Torso
         const torsoGroup = new THREE.Group();
         torsoGroup.position.set(0, 0.72, 0);
 
@@ -378,7 +435,6 @@ export function createRenderer(canvas) {
         root.add(torsoGroup);
         root.torsoGroup = torsoGroup;
 
-        // Head Group
         const headGroup = new THREE.Group();
         headGroup.position.set(0, 1.44, 0);
 
@@ -387,21 +443,18 @@ export function createRenderer(canvas) {
         headMesh.castShadow = true;
         headGroup.add(headMesh);
 
-        // Voxel Ears
         const earL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.10, 0.08), root.mats.skin);
         earL.position.set(-0.25, 0.23, 0);
         const earR = earL.clone();
         earR.position.set(0.25, 0.23, 0);
         headGroup.add(earL, earR);
 
-        // High Cheekbones
         const cheekL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.04), root.mats.skinShade);
         cheekL.position.set(-0.16, 0.18, 0.23);
         const cheekR = cheekL.clone();
         cheekR.position.set(0.16, 0.18, 0.23);
         headGroup.add(cheekL, cheekR);
 
-        // Aquiline Hawk Nose (Van Cleef Signature)
         const noseGroup = new THREE.Group();
         noseGroup.position.set(0, 0.19, 0.23);
 
@@ -415,7 +468,6 @@ export function createRenderer(canvas) {
         headGroup.add(noseGroup);
         root.noseGroup = noseGroup;
 
-        // Slanted Squint Eyes & Brow Ridges
         const browL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.03, 0.04), root.mats.hair);
         browL.position.set(-0.12, 0.30, 0.24);
         browL.rotation.z = -0.08;
@@ -438,7 +490,6 @@ export function createRenderer(canvas) {
 
         headGroup.add(browL, browR, createSlantedEye(-0.12), createSlantedEye(0.12));
 
-        // Trimmed Mustache, Mouth & Chin Goatee
         const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.04, 0.04), root.mats.hair);
         mustache.position.set(0, 0.13, 0.24);
 
@@ -452,14 +503,12 @@ export function createRenderer(canvas) {
         root.mustache = mustache;
         root.goatee = goatee;
 
-        // Sideburns
         const sideburnL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.18, 0.08), root.mats.hair);
         sideburnL.position.set(-0.24, 0.28, 0.10);
         const sideburnR = sideburnL.clone();
         sideburnR.position.set(0.24, 0.28, 0.10);
         headGroup.add(sideburnL, sideburnR);
 
-        // Hat Assembly
         const hatGroup = new THREE.Group();
         hatGroup.position.set(0, 0.46, 0);
 
@@ -478,7 +527,6 @@ export function createRenderer(canvas) {
         root.hatGroup = hatGroup;
         root.hatBrim = brim;
 
-        // Hatless Hair
         const hairLayer = new THREE.Group();
         hairLayer.position.set(0, 0.23, 0);
 
@@ -493,7 +541,6 @@ export function createRenderer(canvas) {
         headGroup.add(hairLayer);
         root.hairLayer = hairLayer;
 
-        // Cigarillo
         const cigarGroup = new THREE.Group();
         cigarGroup.position.set(0.08, 0.08, 0.26);
         const cigarBody = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.035, 0.14), root.mats.cigar);
@@ -507,7 +554,6 @@ export function createRenderer(canvas) {
         root.add(headGroup);
         root.headGroup = headGroup;
 
-        // Left Resting Arm
         const armLeftGroup = new THREE.Group();
         armLeftGroup.position.set(-0.36, 1.38, 0);
 
@@ -517,7 +563,6 @@ export function createRenderer(canvas) {
         armLeftGroup.add(armLeftMesh);
         root.add(armLeftGroup);
 
-        // Right Arm & Peacemaker
         const armRightGroup = new THREE.Group();
         armRightGroup.position.set(0.36, 1.38, 0);
 
@@ -530,36 +575,52 @@ export function createRenderer(canvas) {
         handTip.position.y = -0.58;
         armRightGroup.add(handTip);
 
+        // 1873 Single Action Army Peacemaker
         const gun = new THREE.Group();
         gun.position.set(0, -0.62, 0.10);
         gun.rotation.x = Math.PI / 2;
 
-        const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.44), root.mats.gunSteel);
-        barrel.position.set(0, 0.05, 0.22);
+        const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.065, 0.46), root.mats.bluedSteel);
+        barrel.position.set(0, 0.045, 0.23);
         barrel.castShadow = true;
 
-        const sight = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.04, 0.04), root.mats.gunSilver);
-        sight.position.set(0, 0.10, 0.40);
+        const ejectorRod = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.38), root.mats.ejectorRod);
+        ejectorRod.position.set(0.035, 0.02, 0.20);
 
-        const cylinder = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.16), root.mats.gunSilver);
-        cylinder.position.set(0, 0.04, 0.04);
+        const sight = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.04, 0.05), root.mats.bluedSteel);
+        sight.position.set(0, 0.09, 0.42);
+
+        const cylinder = new THREE.Mesh(new THREE.BoxGeometry(0.115, 0.115, 0.17), root.mats.bluedSteelAccent);
+        cylinder.position.set(0, 0.035, 0.04);
         cylinder.castShadow = true;
 
-        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.12, 0.18), root.mats.gunSteel);
-        frame.position.set(0, 0.03, -0.05);
+        const cylinderPin = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.20), root.mats.bluedSteel);
+        cylinderPin.position.set(0, 0.035, 0.04);
 
-        const hammer = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.06, 0.05), root.mats.gunSilver);
-        hammer.position.set(0, 0.11, -0.12);
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.11, 0.18), root.mats.bluedSteel);
+        frame.position.set(0, 0.025, -0.05);
 
-        const triggerGuard = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.06, 0.08), root.mats.gunSteel);
-        triggerGuard.position.set(0, -0.06, -0.02);
+        const hammer = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.07, 0.05), root.mats.bluedSteelAccent);
+        hammer.position.set(0, 0.10, -0.12);
+        hammer.rotation.x = 0.3;
 
-        const grip = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.20, 0.09), blockMat(0x4a2410));
-        grip.position.set(0, -0.10, -0.10);
-        grip.rotation.x = -0.38;
-        grip.castShadow = true;
+        const triggerGuard = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.055, 0.08), root.mats.brassTrigger);
+        triggerGuard.position.set(0, -0.055, -0.02);
 
-        gun.add(barrel, sight, cylinder, frame, hammer, triggerGuard, grip);
+        const trigger = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.035, 0.03), root.mats.bluedSteel);
+        trigger.position.set(0, -0.045, -0.01);
+        trigger.rotation.x = -0.4;
+
+        const gripUpper = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.14, 0.08), root.mats.walnutGrip);
+        gripUpper.position.set(0, -0.08, -0.09);
+        gripUpper.rotation.x = -0.36;
+        gripUpper.castShadow = true;
+
+        const gripButt = new THREE.Mesh(new THREE.BoxGeometry(0.072, 0.05, 0.085), root.mats.walnutGrip);
+        gripButt.position.set(0, -0.15, -0.12);
+        gripButt.rotation.x = -0.15;
+
+        gun.add(barrel, ejectorRod, sight, cylinder, cylinderPin, frame, hammer, triggerGuard, trigger, gripUpper, gripButt);
         armRightGroup.add(gun);
 
         root.add(armRightGroup);
@@ -594,23 +655,45 @@ export function createRenderer(canvas) {
     twGroup.position.set(0, 0.28, 0.8);
     scene.add(twGroup);
 
-    // 8. Sky Tiers
+    // 8. Drifting Desert Dust Motes
+    const dustCount = 36;
+    const dustGeometry = new THREE.BufferGeometry();
+    const dustPositions = new Float32Array(dustCount * 3);
+    for (let i = 0; i < dustCount; i++) {
+        dustPositions[i * 3] = (Math.random() - 0.5) * 16;
+        dustPositions[i * 3 + 1] = Math.random() * 2.2 + 0.1;
+        dustPositions[i * 3 + 2] = (Math.random() - 0.5) * 6;
+    }
+    dustGeometry.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
+    const dustMaterial = new THREE.PointsMaterial({
+        color: 0xecd6a2,
+        size: 0.05,
+        transparent: true,
+        opacity: 0.45
+    });
+    const dustParticles = new THREE.Points(dustGeometry, dustMaterial);
+    scene.add(dustParticles);
+
+    // Sky Progression
     function updateVoxelSky(round = 1) {
         if (round <= 5) {
-            scene.background.setHex(0x60a8e8);
-            scene.fog.color.setHex(0x60a8e8);
-            sunLight.color.setHex(0xfffaea);
-            sunLight.intensity = 1.4;
+            scene.background.setHex(0x629de0);
+            scene.fog.color.setHex(0x8ebcf0);
+            sunLight.color.setHex(0xfff1dc);
+            sunLight.intensity = 1.55;
+            rimLight.color.setHex(0xd67a48);
         } else if (round <= 12) {
-            scene.background.setHex(0xb84424);
-            scene.fog.color.setHex(0xb84424);
+            scene.background.setHex(0xbd421e);
+            scene.fog.color.setHex(0xd4683c);
             sunLight.color.setHex(0xffaa44);
-            sunLight.intensity = 1.3;
+            sunLight.intensity = 1.4;
+            rimLight.color.setHex(0x5c1810);
         } else {
-            scene.background.setHex(0x0e1424);
-            scene.fog.color.setHex(0x0e1424);
-            sunLight.color.setHex(0x7799cc);
-            sunLight.intensity = 0.7;
+            scene.background.setHex(0x0a101e);
+            scene.fog.color.setHex(0x121c32);
+            sunLight.color.setHex(0x7c9acc);
+            sunLight.intensity = 0.8;
+            rimLight.color.setHex(0x182440);
         }
     }
 
@@ -678,7 +761,16 @@ export function createRenderer(canvas) {
             updateVoxelSky(state.round);
             syncOpponentArchetype(state.currentOutlaw);
 
-            // 1. Camera Tracking & Screen Shake
+            // Animate Desert Dust Drift
+            const pos = dustGeometry.attributes.position.array;
+            for (let i = 0; i < dustCount; i++) {
+                pos[i * 3] += delta * 0.45;
+                pos[i * 3 + 1] += Math.sin(elapsedTime * 2 + i) * 0.002;
+                if (pos[i * 3] > 8) pos[i * 3] = -8;
+            }
+            dustGeometry.attributes.position.needsUpdate = true;
+
+            // Camera Tracking & Shake
             const shake = state.screenShake || 0;
             const shakeX = shake > 0 ? (Math.random() - 0.5) * shake * 0.12 : 0;
             const shakeY = shake > 0 ? (Math.random() - 0.5) * shake * 0.08 : 0;
@@ -704,7 +796,6 @@ export function createRenderer(canvas) {
                 camera.lookAt(0, 1.0, 0);
             }
 
-            // 2. Smooth Breathing & Hand Hover
             const tension = state.tension || 0;
 
             if (!state.playerHasDrawn && state.playerDeathProgress === 0) {
@@ -727,7 +818,6 @@ export function createRenderer(canvas) {
                 opponent.headGroup.rotation.y = Math.cos(elapsedTime * 1.2) * 0.02;
             }
 
-            // 3. Quick-Draw Snap + Recoil Kick
             if (state.playerHasDrawn) {
                 const recoil = state.muzzleFlash && state.muzzleFlash.player > 0 ? -0.22 : 0;
                 player.armRightGroup.rotation.x = THREE.MathUtils.lerp(player.armRightGroup.rotation.x, -Math.PI / 2 + recoil, 0.55);
@@ -740,7 +830,6 @@ export function createRenderer(canvas) {
                 opponent.armRightGroup.rotation.z = 0;
             }
 
-            // 4. Backward Knockback Fall
             if (state.playerDeathProgress > 0) {
                 const t = state.playerDeathProgress;
                 player.rotation.set(0, Math.PI / 2.3, 0);
@@ -769,7 +858,6 @@ export function createRenderer(canvas) {
                 opponent.rotation.set(0, -Math.PI / 2.3, 0);
             }
 
-            // 5. Circular Tumbleweed Rolling & Bouncing
             if (state.tumbleweed && state.tumbleweed.active) {
                 twGroup.visible = true;
                 twGroup.position.x = ((state.tumbleweed.x / canvas.width) - 0.5) * 11.0;
@@ -780,7 +868,6 @@ export function createRenderer(canvas) {
                 twGroup.visible = false;
             }
 
-            // 6. Dynamic Muzzle Flash Point Lights
             if (state.muzzleFlash) {
                 playerMuzzleLight.intensity = state.muzzleFlash.player > 0 ? 8 : 0;
                 opponentMuzzleLight.intensity = state.muzzleFlash.opponent > 0 ? 8 : 0;
