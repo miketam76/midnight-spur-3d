@@ -1,50 +1,52 @@
-# Midnight Spur
+# Midnight Spur 3D
 
-Midnight Spur is an authentic, fast-paced arcade Western standoff game inspired by classic 8-bit frontier showdowns. Face off against an escalating roster of 19 dangerous outlaws across dusty town streets, time your draw with razor-sharp precision, and climb the high-score ledger.
+Midnight Spur 3D is an authentic, fast-paced arcade Western standoff game combining classic spaghetti-western dueling tension with a stylized 3D voxel aesthetic[cite: 12, 13]. Face off against an escalating roster of 19 dangerous outlaws across dusty frontier streets, time your draw with razor-sharp precision, and claim your place on the high-score ledger[cite: 12].
 
 ## Gameplay
 
-- Start a showdown from the main menu or let the Attract Mode roll through live gameplay and leaderboards.
-- Review the Wanted Poster to scout your target, bounty reward, and reaction speed.
-- Hold your nerve during the tension-building countdown meter and audio ticks.
-- Draw at the instant the signal sounds to claim the bounty and advance.
-- Draw too early or hesitate a fraction of a second too long, and you will hit the dirt.
+- **Attract Mode & Title Screen:** Jump right into a showdown or let the arcade Attract Mode cycle between live gameplay demos and top county scores[cite: 12, 13].
+- **Wanted Poster Scout:** Study the 3D-rendered wanted poster before each duel to identify the target's mugshot, bounty reward, and reaction speed[cite: 12, 15].
+- **The Standoff & Tension Meter:** Steady your nerve as the countdown meter fills and rhythmic mechanical pocket-watch clicks escalate the tension[cite: 12, 13].
+- **The Draw:** Tap or strike the instant the metallic hammer cocking signal sounds[cite: 12, 14]. Fire early and you foul out; hesitate for even a fraction of a second, and you bite the dust[cite: 12, 13].
+- **Bounty Progression:** Outdraw your opponent to collect their bounty, build your win streak, and advance to faster, deadlier gunslingers[cite: 12].
 
 ## Features
 
-- **Progressive Sky & Weather Engine:** Dynamic 3-tier time-of-day progression across rounds:
-  - *Tier 1 (Rounds 1–5):* Midday Frontier Blue
-  - *Tier 2 (Rounds 6–12):* Fiery Sunset Orange
-  - *Tier 3 (Rounds 13–19):* Starlight Midnight with twinkling stars and dust storms
-- **Atmospheric Visual FX:** Dynamic wind-blown dust particle drifts, screen shake on heavy shots, expanding muzzle blasts with lingering smoke, and falling death animations with hat-drop physics.
-- **Dynamic Frontier Environment:** Imposing two-story Western townscape featuring the Saloon, Sheriff's Office & Jail, Bank, General Store, and Grand Hotel, complete with rolling, boot-sized bushy tumbleweeds.
-- **Custom Character & Outlaw Roster:** 19 unique outlaws spanning distinct speeds and colorways—culminating in legendary duels against archetypes like the Man in Black and Blondie.
-- **Synthesized Web Audio Engine:** Mechanical 6-click revolver cylinder spins, tension-building countdown ticks, gunshots, rich victory/defeat stingers, and a looping spaghetti western soundtrack.
-- **Arcade Attract Mode & Leaderboard:** Ephemeral high-score rankings tracking cumulative bounties with 3-letter initials entry.
-- **Responsive Standoff Framing:** Native cinematic zoom scaling for mobile and desktop screens.
-- **Full Game Controls:** Complete Pause, Mute, and Quit handling.
+- **3D Voxel Western Townscape:** Imposing frontier facades including the Grand Saloon with swinging batwing doors, Bank, Gunsmith, General Store, and Sheriff's Office—complete with overhanging awnings, hitching rails, supply crates, and rolling 3D tumbleweeds[cite: 15].
+- **Authentic 1873 Single-Action Peacemaker:** Handcrafted voxel revolvers rendered with blued-steel barrels, fluted cylinders, under-barrel ejector rods, brass trigger guards, and dark walnut grips[cite: 15].
+- **Dynamic 3D Wanted Posters:** Pixel-accurate mugshots sculpted on aged parchment textures matching the facial traits, hats, cigars, and facial hair of each outlaw archetype[cite: 15].
+- **Atmospheric Visual & Lighting FX:**
+  - *Dynamic 3-Tier Sky Progression:* Midday Frontier Blue (Rounds 1–5), Fiery Sunset Orange (Rounds 6–12), and Starlight Midnight (Rounds 13–19)[cite: 15].
+  - Drifting 3D desert dust motes, recoil snaps, dynamic point-light muzzle flashes, screen shake, and smooth knockback fall physics[cite: 12, 15].
+- **Acoustic Spaghetti Western Audio Engine:** Built using Web Audio API synthesis:
+  - Multi-layered peacemaker gunshots with sub-bass powder blasts, whip-crack transients, and canyon reverb tails.
+  - Leone-inspired melodic whistle motifs and syncopated Spanish guitar ostinatos.
+  - Revolver cylinder spinning, pawl hammer locks, and pocket-watch ticks.
+  - Zero-hum hard cuts on menu quits, pause, and screen transitions.
+- **Arcade Leaderboard & 3-Letter Entry:** High-score ranking tracking cumulative bounties with arcade-style slot character selection[cite: 12, 13].
+- **Mobile Orientation Lock:** Built-in mobile orientation detection ensuring proper vertical framing during standoffs[cite: 12, 13].
+- **Comprehensive Controls:** Full support for Pause, Audio Mute, and Quit states[cite: 12, 14].
 
 ## Controls
 
-- **Draw / Shoot:** Click, tap, or press `Space` / `Enter`
-- **Initials Entry:** `Up` / `Down` arrow keys to cycle letters, `Enter` or `Space` to confirm
-- **Pause / Resume:** Pause button or `P` key
-- **Mute / Unmute:** Mute button or `M` key
-- **Quit / Return:** Quit button from active duel screens
+- **Draw / Shoot:** Click, tap, or press `Space` / `Enter`[cite: 14]
+- **Initials Entry:** `Left` / `Right` arrows or `A` / `D` to cycle letters, `SELECT` / `Space` / `Enter` to lock in[cite: 14]
+- **Pause / Resume:** `Pause` button or `P` key[cite: 14]
+- **Mute / Unmute:** `Mute` button or `M` key[cite: 14]
+- **Quit / Menu:** `Quit` button to return to title[cite: 13, 14]
 
 ## Project Structure
 
-- `index.html` — App shell, HUD overlays, high-score leaderboards, and canvas element
-- `styles.css` — Retro arcade UI, responsive mobile framing, and typography
-- `src/main.js` — Bootstrapping, input listeners, and attract mode bindings
-- `src/game.js` — Core game state machine, outlaw roster, pause logic, timing engine, and high scores
-- `src/render.js` — Canvas rendering engine, multi-tier sky palettes, 16-bit sprites, tumbleweed, dust particles, and town backdrops
-- `src/audio.js` — Web Audio API sound synthesizer (revolver ratchet, gunshots, stingers, music loop)
-- `src/storage.js` — Local persistence helpers
+- `index.html` — Application shell, HUD overlays, 3D canvas mount, and responsive screen viewports[cite: 13]
+- `styles.css` — Retro arcade UI styling, tension bar overlays, and portrait orientation lock[cite: 16]
+- `src/main.js` — Input controller routing, keyboard shortcuts, and attraction mode interrupts[cite: 14]
+- `src/game.js` — Core game state machine, outlaw roster, difficulty scaling, cumulative bounty accounting, and initials entry[cite: 12]
+- `src/render.js` — Three.js voxel rendering pipeline, lighting, procedural western architecture, dynamic wanted posters, and character animations[cite: 15]
+- `src/audio.js` — Web Audio API acoustic sound generator (gunshots, cylinder spin, whistles, and soundtrack loops)
 
 ## Running Locally
 
-No build step or external dependencies are required. Run the project from any simple static file server:
+No build steps or bundling tools are required. Serve the project using any standard static web server:
 
 ```bash
 # Python 3
