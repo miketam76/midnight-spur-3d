@@ -655,69 +655,161 @@ canvas {
     }
 }
 
+/* Widescreen Mobile Landscape Mode (e.g. Samsung A-series 19.5:9 / max-height 500px) */
 @media (orientation: landscape) and (max-height: 500px) {
     .app-shell {
-        padding: 4px 8px;
+        padding: 4px 10px;
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    .screen {
+        width: 100%;
+        max-width: 100%;
     }
 
     .screen--game {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        grid-template-rows: auto 1fr auto;
-        column-gap: 12px;
-        row-gap: 4px;
+        width: 100%;
+        min-height: 100dvh;
         height: 100dvh;
-        max-height: 100dvh;
+        display: grid;
+        grid-template-columns: 1fr 180px;
+        grid-template-rows: auto 1fr auto;
+        column-gap: 14px;
+        row-gap: 4px;
+        padding: 2px 0;
+        align-items: center;
     }
 
-    /* Keep HUD compact along the top */
+    /* Top HUD in Landscape */
     .hud {
         grid-column: 1;
         grid-row: 1;
         width: 100%;
         gap: 6px;
+        padding: 0;
     }
 
     .hud>div {
-        padding: 2px 6px;
+        padding: 3px 8px;
+        border-radius: 10px;
     }
 
-    /* Allow canvas to fill remaining height */
+    .hud-label {
+        font-size: 0.46rem;
+        margin: 0;
+    }
+
+    .hud strong {
+        font-size: 0.65rem;
+    }
+
+    /* Center 3D Arena Frame */
     .arena-frame {
         grid-column: 1;
         grid-row: 2;
         width: 100%;
         height: 100%;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     canvas {
-        max-height: calc(100dvh - 90px);
         width: auto;
+        height: 100%;
+        max-height: calc(100dvh - 94px);
         aspect-ratio: 16 / 9;
+        border-radius: 16px;
     }
 
-    /* Place controls on the right side for thumb reach */
+    .status-banner {
+        top: 6px;
+        min-height: 32px;
+        padding: 3px 12px;
+    }
+
+    .status-banner p {
+        font-size: 0.55rem;
+    }
+
+    .timer-track {
+        top: 42px;
+        height: 8px;
+        width: 44%;
+    }
+
+    /* Right Thumb Draw Control */
     .controls {
         grid-column: 2;
         grid-row: 1 / span 2;
+        width: 100%;
+        height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        width: 140px;
+        padding: 0;
+        gap: 0;
     }
 
     .draw-button {
-        min-height: 80px;
         width: 100%;
+        min-height: 120px;
+        height: 75%;
+        border-radius: 16px;
+        font-size: 1.15rem;
+        display: grid;
+        place-items: center;
     }
 
     .hint {
         display: none;
-        /* Hide non-essential text to save space */
     }
 
+    /* Bottom Utility Bar */
     .utility-bar {
         grid-column: 1 / -1;
         grid-row: 3;
+        width: 100%;
+        padding: 0;
+        gap: 8px;
+    }
+
+    .utility-button {
+        min-height: 32px;
+        padding: 4px 10px;
+        font-size: 0.54rem;
+        border-radius: 10px;
+    }
+
+    .poster,
+    .result-card {
+        padding: 14px 20px;
+        max-height: 94dvh;
+        overflow-y: auto;
+    }
+
+    h1,
+    h2 {
+        font-size: 1.25rem;
+    }
+
+    .subcopy {
+        margin-top: 6px;
+        font-size: 0.78rem;
+    }
+
+    .menu-card,
+    .result-stats {
+        margin-top: 10px;
+        gap: 8px;
+    }
+
+    .primary-button,
+    .secondary-button {
+        min-height: 42px;
+        padding: 8px 14px;
+        font-size: 0.72rem;
     }
 }
