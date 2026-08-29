@@ -424,6 +424,10 @@ export function createGame(dom) {
 
     function showHighScores() {
         clearAttractTimer();
+        state.pendingTransition = null;
+        state.pendingTransitionAt = 0;
+        audio.stopMusic();
+
         state.phase = phases.scores;
         renderHighScoresTable();
         showScreen(phases.scores);
@@ -452,6 +456,10 @@ export function createGame(dom) {
 
     function startMenu(playGunshot = false) {
         clearAttractTimer();
+        state.pendingTransition = null;
+        state.pendingTransitionAt = 0;
+        audio.stopMusic();
+
         state.phase = phases.menu;
         state.isPaused = false;
         state.isDemo = false;

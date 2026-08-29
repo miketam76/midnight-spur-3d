@@ -50,10 +50,8 @@ function scheduleNoiseBurst(context, startTime, duration, gainValue) {
     source.stop(startTime + duration + 0.02);
 }
 
-
 // Authentic Peacemaker Shot with Layered Ricochet Whine
 function playPeacemakerShot(context, startTime, withRicochet = false) {
-    // 1. Rapid Pitch-Dive Pulse Wave (Pistol Body)
     const osc = context.createOscillator();
     const gainNode = context.createGain();
 
@@ -70,10 +68,8 @@ function playPeacemakerShot(context, startTime, withRicochet = false) {
     osc.start(startTime);
     osc.stop(startTime + 0.09);
 
-    // 2. Gunpowder Noise Blast
     scheduleNoiseBurst(context, startTime, 0.08, 0.26);
 
-    // 3. Iconic Western Bullet Ricochet Whine
     if (withRicochet) {
         const ricoOsc = context.createOscillator();
         const ricoGain = context.createGain();
@@ -114,7 +110,7 @@ function scheduleTrackedTone(context, frequency, startTime, duration, type, gain
     osc.start(startTime);
     osc.stop(startTime + duration + 0.02);
 
-    registerNode(osc);
+    registerNode(osc, gainNode);
 }
 
 // Spaghetti Western Theme Loop
@@ -172,10 +168,10 @@ export function createAudioSystem() {
         return context;
     }
 
-    function registerMusicNode(node) {
-        activeMusicNodes.push(node);
-        node.onended = () => {
-            activeMusicNodes = activeMusicNodes.filter((n) => n !== node);
+    function registerMusicNode(osc, gainNode) {
+        activeMusicNodes.push({ osc, gainNode });
+        osc.onended = () => {
+            activeMusicNodes = activeMusicNodes.filter((item) => item.osc !== osc);
         };
     }
 
@@ -191,18 +187,22 @@ export function createAudioSystem() {
         musicLoopEnd = 0;
         clearMusicTimer();
 
-        activeMusicNodes.forEach((node) => {
+        if (musicGain && context) {
+            musicGain.gain.cancelScheduledValues(0);
+            musicGain.gain.setValueAtTime(0, context.currentTime);
+        }
+
+        activeMusicNodes.forEach((item) => {
             try {
-                node.stop(0);
-                node.disconnect();
+                if (item.gainNode && context) {
+                    item.gainNode.gain.cancelScheduledValues(0);
+                    item.gainNode.gain.setValueAtTime(0, context.currentTime);
+                }
+                item.osc.stop(0);
+                item.osc.disconnect();
             } catch (err) { }
         });
         activeMusicNodes = [];
-
-        if (musicGain && context) {
-            musicGain.gain.cancelScheduledValues(context.currentTime);
-            musicGain.gain.setValueAtTime(0, context.currentTime);
-        }
     }
 
     function scheduleMusic() {
@@ -262,7 +262,6 @@ export function createAudioSystem() {
         isMuted() {
             return muted;
         },
-        // Pocket Watch / Heartbeat Tension Click
         playTick(pitchMult = 1.0) {
             if (muted) return;
             const ctx = ensureContext();
@@ -271,7 +270,6 @@ export function createAudioSystem() {
             scheduleTone(ctx, 1200 * pitchMult, now, 0.015, 'sine', 0.035);
             scheduleNoiseBurst(ctx, now, 0.01, 0.02);
         },
-        // Tension Draw Cue
         playSignal() {
             if (muted) return;
             const ctx = ensureContext();
@@ -280,41 +278,37 @@ export function createAudioSystem() {
             scheduleTone(ctx, 440, now, 0.06, 'triangle', 0.08);
             scheduleTone(ctx, 880, now + 0.05, 0.12, 'square', 0.07);
         },
-        // Player Winning Peacemaker Shot + Ricochet Whistle
         playDraw() {
             if (muted) return;
             const ctx = ensureContext();
             if (!ctx) return;
             playPeacemakerShot(ctx, ctx.currentTime, true);
         },
-        // Opponent / Hit Shot
         playHit() {
             if (muted) return;
             const ctx = ensureContext();
             if (!ctx) return;
             playPeacemakerShot(ctx, ctx.currentTime, false);
         },
-        // Victory Fanfare Motif
         playVictory() {
             if (muted) return;
             const ctx = ensureContext();
             if (!ctx) return;
             const now = ctx.currentTime;
-            scheduleTone(ctx, 523.25, now, 0.10, 'triangle', 0.07);        // C5
-            scheduleTone(ctx, 659.25, now + 0.11, 0.10, 'triangle', 0.07); // E5
-            scheduleTone(ctx, 783.99, now + 0.22, 0.10, 'triangle', 0.07); // G5
-            scheduleTone(ctx, 1046.50, now + 0.33, 0.25, 'triangle', 0.08); // C6
+            scheduleTone(ctx, 523.25, now, 0.10, 'triangle', 0.07);
+            scheduleTone(ctx, 659.25, now + 0.11, 0.10, 'triangle', 0.07);
+            scheduleTone(ctx, 783.99, now + 0.22, 0.10, 'triangle', 0.07);
+            scheduleTone(ctx, 1046.50, now + 0.33, 0.25, 'triangle', 0.08);
         },
-        // Saloon Defeat Sting (Dissonant Piano Drop)
         playLoss() {
             if (muted) return;
             const ctx = ensureContext();
             if (!ctx) return;
             const now = ctx.currentTime;
             playPeacemakerShot(ctx, now, false);
-            scheduleTone(ctx, 311.13, now + 0.06, 0.16, 'sawtooth', 0.05, -30); // Eb
-            scheduleTone(ctx, 293.66, now + 0.18, 0.22, 'sawtooth', 0.05, -45); // D
-            scheduleTone(ctx, 146.83, now + 0.32, 0.38, 'sawtooth', 0.06, -60); // Low D drop
+            scheduleTone(ctx, 311.13, now + 0.06, 0.16, 'sawtooth', 0.05, -30);
+            scheduleTone(ctx, 293.66, now + 0.18, 0.22, 'sawtooth', 0.05, -45);
+            scheduleTone(ctx, 146.83, now + 0.32, 0.38, 'sawtooth', 0.06, -60);
         },
         playCylinderSpin() {
             if (muted) return;
