@@ -139,7 +139,7 @@ export function createRenderer(canvas) {
     function updateWantedPoster(outlaw) {
         if (!outlaw) return;
         const name = (outlaw.name || 'UNKNOWN OUTLAW').toUpperCase();
-        const bounty = outlaw.bounty ? `$${outlaw.bounty.toLocaleString()}` : '$25,000';
+        const bounty = outlaw.bounty ? `${outlaw.bounty.toLocaleString()}` : '$25,000';
         const crime = outlaw.crime || 'TRAIN ROBBERY & MURDER';
         const outfit = outlaw.outfit || {};
 

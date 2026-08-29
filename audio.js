@@ -1,4 +1,4 @@
-// audio.js - Midnight Spur: Realistic Western Audio Synthesizer (Acoustic Layers)
+// audio.js - Midnight Spur: Authentic Spaghetti Western Soundscape
 
 function createNoiseBuffer(context, duration = 1.0) {
     const bufferSize = Math.max(1, Math.floor(context.sampleRate * duration));
@@ -20,11 +20,11 @@ function createNoiseBuffer(context, duration = 1.0) {
     return buffer;
 }
 
-// Layered Gunshot Synthesizer (Crack + Powder + Sub-Bass + Desert Echo Tail)
+// Layered Peacemaker Gunshot (Crack + Powder Blast + Reverb Tail + Ricochet)
 function playAuthenticGunshot(context, startTime, hasRicochet = false) {
     const now = startTime;
 
-    // 1. Initial High-Velocity Crack (0 - 45ms)
+    // 1. Initial High-Velocity Crack
     const crackSource = context.createBufferSource();
     crackSource.buffer = createNoiseBuffer(context, 0.08);
 
@@ -42,7 +42,7 @@ function playAuthenticGunshot(context, startTime, hasRicochet = false) {
     crackGain.connect(context.destination);
     crackSource.start(now);
 
-    // 2. Sub-Bass Powder Blast (Punch & Weight)
+    // 2. Sub-Bass Powder Blast
     const subOsc = context.createOscillator();
     subOsc.type = 'sine';
     subOsc.frequency.setValueAtTime(160, now);
@@ -57,7 +57,7 @@ function playAuthenticGunshot(context, startTime, hasRicochet = false) {
     subOsc.start(now);
     subOsc.stop(now + 0.28);
 
-    // 3. Canyon Reverb / Desert Echo Tail (0.05s - 1.2s)
+    // 3. Desert Canyon Reverb Tail
     const tailSource = context.createBufferSource();
     tailSource.buffer = createNoiseBuffer(context, 1.2);
 
@@ -75,7 +75,7 @@ function playAuthenticGunshot(context, startTime, hasRicochet = false) {
     tailGain.connect(context.destination);
     tailSource.start(now + 0.02);
 
-    // 4. Spaghetti Western Bullet Ricochet Whine
+    // 4. Bullet Ricochet
     if (hasRicochet) {
         const ricoOsc = context.createOscillator();
         const ricoGain = context.createGain();
@@ -96,21 +96,28 @@ function playAuthenticGunshot(context, startTime, hasRicochet = false) {
     }
 }
 
-// Tracked Tone Scheduler for Theme
-function scheduleTrackedTone(context, frequency, startTime, duration, type, gainValue, destinationGain, registerNode) {
+// --- SPAGHETTI WESTERN INSTRUMENTATION ---
+
+// 1. Acoustic / Spanish Guitar Pluck
+function scheduleAcousticPluck(context, frequency, startTime, duration, gainValue, destinationGain, registerNode) {
     const osc = context.createOscillator();
+    const filter = context.createBiquadFilter();
     const gainNode = context.createGain();
 
-    osc.type = type;
-    osc.frequency.value = frequency;
-    gainNode.gain.value = gainValue;
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(frequency, startTime);
 
-    osc.connect(gainNode);
-    gainNode.connect(destinationGain);
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(2200, startTime);
+    filter.frequency.exponentialRampToValueAtTime(320, startTime + duration);
 
     gainNode.gain.setValueAtTime(0, startTime);
-    gainNode.gain.linearRampToValueAtTime(gainValue, startTime + 0.004);
-    gainNode.gain.exponentialRampToValueAtTime(Math.max(0.0001, gainValue * 0.001), startTime + duration);
+    gainNode.gain.linearRampToValueAtTime(gainValue, startTime + 0.006);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+    osc.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(destinationGain);
 
     osc.start(startTime);
     osc.stop(startTime + duration + 0.02);
@@ -118,29 +125,85 @@ function scheduleTrackedTone(context, frequency, startTime, duration, type, gain
     registerNode(osc, gainNode);
 }
 
-// Spaghetti Western Standoff Theme
+// 2. The Lone Whistle (Sine wave with Morricone vibrato & portamento)
+function scheduleWhistleNote(context, fromFreq, toFreq, startTime, duration, gainValue, destinationGain, registerNode) {
+    const osc = context.createOscillator();
+    const gainNode = context.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(fromFreq, startTime);
+    osc.frequency.exponentialRampToValueAtTime(toFreq, startTime + duration * 0.3);
+
+    // Expressive vibrato depth
+    const now = startTime;
+    const vibrato = context.createOscillator();
+    const vibratoGain = context.createGain();
+    vibrato.frequency.value = 5.2; // 5.2 Hz human whistle vibrato
+    vibratoGain.gain.value = 4.5;
+    vibrato.connect(osc.frequency);
+    vibrato.start(now);
+    vibrato.stop(now + duration);
+
+    gainNode.gain.setValueAtTime(0, startTime);
+    gainNode.gain.linearRampToValueAtTime(gainValue, startTime + 0.05);
+    gainNode.gain.setValueAtTime(gainValue * 0.9, startTime + duration * 0.7);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+    osc.connect(gainNode);
+    gainNode.connect(destinationGain);
+
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.02);
+
+    registerNode(osc, gainNode);
+    registerNode(vibrato, vibratoGain);
+}
+
+// 3. Standoff Composition in D Minor (8-bar loop)
 function scheduleWesternLoopTracked(context, startTime, musicGain, registerNode) {
-    const beat = 60 / 102;
-    const bassNotes = [82.41, 98.00, 110.00, 98.00];
+    const tempo = 104;
+    const beat = 60 / tempo; // ~0.576s per beat
 
-    for (let bar = 0; bar < 2; bar += 1) {
+    // Rhythmic Spanish Guitar / Bass Ostinato (D Minor Strum Pattern)
+    const guitarChords = [
+        { bass: 73.42, root: 146.83, fifth: 220.00, minorThird: 174.61 }, // Dm
+        { bass: 65.41, root: 130.81, fifth: 196.00, minorThird: 164.81 }, // C
+        { bass: 58.27, root: 116.54, fifth: 174.61, minorThird: 146.83 }, // Bb
+        { bass: 55.00, root: 110.00, fifth: 164.81, minorThird: 138.59 }, // A (Dominant)
+    ];
+
+    for (let bar = 0; bar < 4; bar++) {
         const barStart = startTime + bar * 4 * beat;
+        const chord = guitarChords[bar];
 
-        bassNotes.forEach((frequency, beatIndex) => {
-            const noteStart = barStart + beatIndex * beat;
-            scheduleTrackedTone(context, frequency, noteStart, beat * 0.4, 'triangle', 0.05, musicGain, registerNode);
-            scheduleTrackedTone(context, frequency * 2, noteStart + beat * 0.5, beat * 0.25, 'triangle', 0.03, musicGain, registerNode);
-        });
+        // Bass drop on beat 1 & 3
+        scheduleAcousticPluck(context, chord.bass, barStart, beat * 1.2, 0.09, musicGain, registerNode);
+        scheduleAcousticPluck(context, chord.bass, barStart + beat * 2, beat * 0.9, 0.07, musicGain, registerNode);
 
-        const melody = bar === 0
-            ? [{ t: 0, f: 659.25 }, { t: 1.5, f: 783.99 }, { t: 2.5, f: 880.00 }]
-            : [{ t: 0, f: 783.99 }, { t: 1.5, f: 659.25 }, { t: 2.5, f: 587.33 }];
-
-        melody.forEach((note) => {
-            const noteStart = barStart + note.t * beat;
-            scheduleTrackedTone(context, note.f, noteStart, beat * 0.9, 'triangle', 0.04, musicGain, registerNode);
-        });
+        // Syncopated Spanish guitar finger-picking
+        scheduleAcousticPluck(context, chord.root, barStart + beat * 0.5, beat * 0.45, 0.05, musicGain, registerNode);
+        scheduleAcousticPluck(context, chord.minorThird, barStart + beat * 1.0, beat * 0.45, 0.045, musicGain, registerNode);
+        scheduleAcousticPluck(context, chord.fifth, barStart + beat * 1.5, beat * 0.45, 0.045, musicGain, registerNode);
+        scheduleAcousticPluck(context, chord.root, barStart + beat * 2.5, beat * 0.45, 0.05, musicGain, registerNode);
+        scheduleAcousticPluck(context, chord.minorThird, barStart + beat * 3.0, beat * 0.45, 0.045, musicGain, registerNode);
+        scheduleAcousticPluck(context, chord.fifth, barStart + beat * 3.5, beat * 0.35, 0.04, musicGain, registerNode);
     }
+
+    // Iconic Whistle Melody (The Leone Standoff Hook)
+    // Bar 1: A4 -> D5 -> F5
+    scheduleWhistleNote(context, 440.00, 587.33, startTime + beat * 0.5, beat * 1.8, 0.055, musicGain, registerNode);
+    scheduleWhistleNote(context, 587.33, 698.46, startTime + beat * 2.5, beat * 1.3, 0.06, musicGain, registerNode);
+
+    // Bar 2: E5 -> D5 slide down
+    scheduleWhistleNote(context, 659.25, 587.33, startTime + beat * 4.0, beat * 2.6, 0.055, musicGain, registerNode);
+
+    // Bar 3: F5 -> G5 -> A5
+    scheduleWhistleNote(context, 698.46, 783.99, startTime + beat * 8.5, beat * 1.8, 0.06, musicGain, registerNode);
+    scheduleWhistleNote(context, 783.99, 880.00, startTime + beat * 10.5, beat * 1.3, 0.065, musicGain, registerNode);
+
+    // Bar 4: F5 -> E5 -> D5 resolution
+    scheduleWhistleNote(context, 698.46, 659.25, startTime + beat * 12.0, beat * 1.8, 0.055, musicGain, registerNode);
+    scheduleWhistleNote(context, 659.25, 587.33, startTime + beat * 14.0, beat * 2.0, 0.05, musicGain, registerNode);
 }
 
 export function createAudioSystem() {
@@ -211,7 +274,7 @@ export function createAudioSystem() {
         if (!context || muted || !musicEnabled) return;
 
         const now = context.currentTime;
-        const lookahead = 2.5;
+        const lookahead = 3.5;
 
         if (musicGain) {
             musicGain.gain.cancelScheduledValues(now);
@@ -221,7 +284,7 @@ export function createAudioSystem() {
         if (musicLoopEnd === 0 || now + lookahead >= musicLoopEnd) {
             const nextStart = musicLoopEnd === 0 ? now + 0.05 : musicLoopEnd;
             scheduleWesternLoopTracked(context, nextStart, musicGain, registerMusicNode);
-            musicLoopEnd = nextStart + (60 / 102) * 8;
+            musicLoopEnd = nextStart + (60 / 104) * 16; // 4 bars of 4 beats
         }
     }
 
@@ -237,7 +300,7 @@ export function createAudioSystem() {
             musicEnabled = true;
             musicLoopEnd = 0;
             scheduleMusic();
-            musicTimer = window.setInterval(scheduleMusic, 1000);
+            musicTimer = window.setInterval(scheduleMusic, 1200);
         },
         stopMusic() {
             stopMusic();
@@ -257,7 +320,7 @@ export function createAudioSystem() {
             } else if (musicEnabled) {
                 scheduleMusic();
                 clearMusicTimer();
-                musicTimer = window.setInterval(scheduleMusic, 1000);
+                musicTimer = window.setInterval(scheduleMusic, 1200);
             }
             return muted;
         },
@@ -268,7 +331,7 @@ export function createAudioSystem() {
             return muted;
         },
 
-        // Pocket Watch Ticking (Dual-gear mechanical click)
+        // Pocket Watch Ticking
         playTick(pitchMult = 1.0) {
             if (muted) return;
             const ctx = ensureContext();
@@ -297,7 +360,6 @@ export function createAudioSystem() {
             if (!ctx) return;
             const now = ctx.currentTime;
 
-            // Click 1 (Pawl engagement)
             const osc1 = ctx.createOscillator();
             osc1.type = 'triangle';
             osc1.frequency.setValueAtTime(1800, now);
@@ -312,7 +374,6 @@ export function createAudioSystem() {
             osc1.start(now);
             osc1.stop(now + 0.035);
 
-            // Click 2 (Solid cylinder lock)
             const osc2 = ctx.createOscillator();
             osc2.type = 'square';
             osc2.frequency.setValueAtTime(2600, now + 0.04);
@@ -328,7 +389,7 @@ export function createAudioSystem() {
             osc2.stop(now + 0.085);
         },
 
-        // Player Gunshot (Full Peacemaker blast + Whistle Ricochet)
+        // Player Gunshot
         playDraw() {
             if (muted) return;
             const ctx = ensureContext();
@@ -336,7 +397,7 @@ export function createAudioSystem() {
             playAuthenticGunshot(ctx, ctx.currentTime, true);
         },
 
-        // Opponent Gunshot (Heavy Body Hit)
+        // Opponent Gunshot
         playHit() {
             if (muted) return;
             const ctx = ensureContext();
@@ -344,7 +405,7 @@ export function createAudioSystem() {
             playAuthenticGunshot(ctx, ctx.currentTime, false);
         },
 
-        // Victory Acoustic Motif (Bell Harmonic Chime)
+        // Victory Chime
         playVictory() {
             if (muted) return;
             const ctx = ensureContext();
@@ -367,7 +428,7 @@ export function createAudioSystem() {
             });
         },
 
-        // Loss Thud & Resonant Drop
+        // Loss Thud & Drop
         playLoss() {
             if (muted) return;
             const ctx = ensureContext();
@@ -376,7 +437,6 @@ export function createAudioSystem() {
 
             playAuthenticGunshot(ctx, now, false);
 
-            // Body Thud impact
             const thudOsc = ctx.createOscillator();
             thudOsc.type = 'sine';
             thudOsc.frequency.setValueAtTime(110, now + 0.15);
@@ -392,7 +452,7 @@ export function createAudioSystem() {
             thudOsc.stop(now + 0.52);
         },
 
-        // Rapid Metallic Cylinder Spin with Decreasing Rate of Clicks
+        // Revolver Cylinder Spin
         playCylinderSpin() {
             if (muted) return;
             const ctx = ensureContext();
