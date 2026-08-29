@@ -655,161 +655,66 @@ canvas {
     }
 }
 
-/* Widescreen Mobile Landscape Mode (e.g. Samsung A-series 19.5:9 / max-height 500px) */
-@media (orientation: landscape) and (max-height: 500px) {
-    .app-shell {
-        padding: 4px 10px;
-        height: 100dvh;
-        overflow: hidden;
+/* --- PORTRAIT ONLY ENFORCEMENT FOR MOBILE --- */
+.orientation-warning {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(7, 11, 20, 0.96);
+    backdrop-filter: blur(8px);
+    place-items: center;
+    padding: 24px;
+    text-align: center;
+}
+
+.orientation-card {
+    background: linear-gradient(180deg, rgba(28, 42, 68, 0.96), rgba(12, 18, 32, 0.94));
+    border: 2px solid rgba(244, 227, 193, 0.24);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 380px;
+}
+
+.orientation-card h2 {
+    font-size: 1.1rem;
+    color: var(--accent);
+    margin: 12px 0 8px;
+}
+
+.orientation-card p {
+    font-size: 0.85rem;
+    color: var(--paper);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.phone-rotate-icon {
+    font-size: 2.8rem;
+    animation: rotateDevice 1.8s infinite ease-in-out;
+}
+
+@keyframes rotateDevice {
+
+    0%,
+    15% {
+        transform: rotate(90deg);
     }
 
-    .screen {
-        width: 100%;
-        max-width: 100%;
+    50%,
+    85% {
+        transform: rotate(0deg);
     }
 
-    .screen--game {
-        width: 100%;
-        min-height: 100dvh;
-        height: 100dvh;
+    100% {
+        transform: rotate(90deg);
+    }
+}
+
+/* Trigger overlay only on short landscape screens (phones & small tablets) */
+@media (orientation: landscape) and (max-height: 540px) {
+    .orientation-warning {
         display: grid;
-        grid-template-columns: 1fr 180px;
-        grid-template-rows: auto 1fr auto;
-        column-gap: 14px;
-        row-gap: 4px;
-        padding: 2px 0;
-        align-items: center;
-    }
-
-    /* Top HUD in Landscape */
-    .hud {
-        grid-column: 1;
-        grid-row: 1;
-        width: 100%;
-        gap: 6px;
-        padding: 0;
-    }
-
-    .hud>div {
-        padding: 3px 8px;
-        border-radius: 10px;
-    }
-
-    .hud-label {
-        font-size: 0.46rem;
-        margin: 0;
-    }
-
-    .hud strong {
-        font-size: 0.65rem;
-    }
-
-    /* Center 3D Arena Frame */
-    .arena-frame {
-        grid-column: 1;
-        grid-row: 2;
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    canvas {
-        width: auto;
-        height: 100%;
-        max-height: calc(100dvh - 94px);
-        aspect-ratio: 16 / 9;
-        border-radius: 16px;
-    }
-
-    .status-banner {
-        top: 6px;
-        min-height: 32px;
-        padding: 3px 12px;
-    }
-
-    .status-banner p {
-        font-size: 0.55rem;
-    }
-
-    .timer-track {
-        top: 42px;
-        height: 8px;
-        width: 44%;
-    }
-
-    /* Right Thumb Draw Control */
-    .controls {
-        grid-column: 2;
-        grid-row: 1 / span 2;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 0;
-        gap: 0;
-    }
-
-    .draw-button {
-        width: 100%;
-        min-height: 120px;
-        height: 75%;
-        border-radius: 16px;
-        font-size: 1.15rem;
-        display: grid;
-        place-items: center;
-    }
-
-    .hint {
-        display: none;
-    }
-
-    /* Bottom Utility Bar */
-    .utility-bar {
-        grid-column: 1 / -1;
-        grid-row: 3;
-        width: 100%;
-        padding: 0;
-        gap: 8px;
-    }
-
-    .utility-button {
-        min-height: 32px;
-        padding: 4px 10px;
-        font-size: 0.54rem;
-        border-radius: 10px;
-    }
-
-    .poster,
-    .result-card {
-        padding: 14px 20px;
-        max-height: 94dvh;
-        overflow-y: auto;
-    }
-
-    h1,
-    h2 {
-        font-size: 1.25rem;
-    }
-
-    .subcopy {
-        margin-top: 6px;
-        font-size: 0.78rem;
-    }
-
-    .menu-card,
-    .result-stats {
-        margin-top: 10px;
-        gap: 8px;
-    }
-
-    .primary-button,
-    .secondary-button {
-        min-height: 42px;
-        padding: 8px 14px;
-        font-size: 0.72rem;
     }
 }
