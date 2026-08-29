@@ -1,97 +1,102 @@
-// audio.js - Midnight Spur Expanded 8-Bit Chiptune System
+// audio.js - Midnight Spur: Realistic Western Audio Synthesizer (Acoustic Layers)
 
-function scheduleTone(context, frequency, startTime, duration, type = 'square', gainValue = 0.08, detune = 0) {
-    const oscillator = context.createOscillator();
-    const gainNode = context.createGain();
-
-    oscillator.type = type;
-    oscillator.frequency.value = frequency;
-    oscillator.detune.value = detune;
-    gainNode.gain.value = gainValue;
-
-    oscillator.connect(gainNode);
-    gainNode.connect(context.destination);
-
-    gainNode.gain.setValueAtTime(0, startTime);
-    gainNode.gain.linearRampToValueAtTime(gainValue, startTime + 0.004);
-    gainNode.gain.exponentialRampToValueAtTime(Math.max(0.0001, gainValue * 0.001), startTime + duration);
-
-    oscillator.start(startTime);
-    oscillator.stop(startTime + duration + 0.02);
-}
-
-function scheduleNoiseBurst(context, startTime, duration, gainValue) {
+function createNoiseBuffer(context, duration = 1.0) {
     const bufferSize = Math.max(1, Math.floor(context.sampleRate * duration));
     const buffer = context.createBuffer(1, bufferSize, context.sampleRate);
     const data = buffer.getChannelData(0);
 
-    for (let index = 0; index < bufferSize; index += 1) {
-        const falloff = 1 - index / bufferSize;
-        data[index] = (Math.random() * 2 - 1) * falloff;
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.0750759;
+        b2 = 0.96900 * b2 + white * 0.1538520;
+        b3 = 0.86650 * b3 + white * 0.3104856;
+        b4 = 0.55000 * b4 + white * 0.5329522;
+        b5 = -0.7616 * b5 - white * 0.0168980;
+        data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+        b6 = white * 0.115926;
     }
-
-    const source = context.createBufferSource();
-    const bandPass = context.createBiquadFilter();
-    const gainNode = context.createGain();
-
-    source.buffer = buffer;
-    bandPass.type = 'bandpass';
-    bandPass.frequency.value = 2400;
-    bandPass.Q.value = 1.2;
-    gainNode.gain.setValueAtTime(0, startTime);
-    gainNode.gain.linearRampToValueAtTime(gainValue, startTime + 0.002);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-
-    source.connect(bandPass);
-    bandPass.connect(gainNode);
-    gainNode.connect(context.destination);
-
-    source.start(startTime);
-    source.stop(startTime + duration + 0.02);
+    return buffer;
 }
 
-// Authentic Peacemaker Shot with Layered Ricochet Whine
-function playPeacemakerShot(context, startTime, withRicochet = false) {
-    const osc = context.createOscillator();
-    const gainNode = context.createGain();
+// Layered Gunshot Synthesizer (Crack + Powder + Sub-Bass + Desert Echo Tail)
+function playAuthenticGunshot(context, startTime, hasRicochet = false) {
+    const now = startTime;
 
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(280, startTime);
-    osc.frequency.exponentialRampToValueAtTime(36, startTime + 0.09);
+    // 1. Initial High-Velocity Crack (0 - 45ms)
+    const crackSource = context.createBufferSource();
+    crackSource.buffer = createNoiseBuffer(context, 0.08);
 
-    gainNode.gain.setValueAtTime(0.22, startTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 0.09);
+    const crackFilter = context.createBiquadFilter();
+    crackFilter.type = 'highpass';
+    crackFilter.frequency.setValueAtTime(1400, now);
+    crackFilter.frequency.exponentialRampToValueAtTime(400, now + 0.05);
 
-    osc.connect(gainNode);
-    gainNode.connect(context.destination);
+    const crackGain = context.createGain();
+    crackGain.gain.setValueAtTime(1.4, now);
+    crackGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
 
-    osc.start(startTime);
-    osc.stop(startTime + 0.09);
+    crackSource.connect(crackFilter);
+    crackFilter.connect(crackGain);
+    crackGain.connect(context.destination);
+    crackSource.start(now);
 
-    scheduleNoiseBurst(context, startTime, 0.08, 0.26);
+    // 2. Sub-Bass Powder Blast (Punch & Weight)
+    const subOsc = context.createOscillator();
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(160, now);
+    subOsc.frequency.exponentialRampToValueAtTime(30, now + 0.22);
 
-    if (withRicochet) {
+    const subGain = context.createGain();
+    subGain.gain.setValueAtTime(1.0, now);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+    subOsc.connect(subGain);
+    subGain.connect(context.destination);
+    subOsc.start(now);
+    subOsc.stop(now + 0.28);
+
+    // 3. Canyon Reverb / Desert Echo Tail (0.05s - 1.2s)
+    const tailSource = context.createBufferSource();
+    tailSource.buffer = createNoiseBuffer(context, 1.2);
+
+    const tailFilter = context.createBiquadFilter();
+    tailFilter.type = 'lowpass';
+    tailFilter.frequency.setValueAtTime(900, now + 0.02);
+    tailFilter.frequency.exponentialRampToValueAtTime(180, now + 1.1);
+
+    const tailGain = context.createGain();
+    tailGain.gain.setValueAtTime(0.55, now + 0.02);
+    tailGain.gain.exponentialRampToValueAtTime(0.001, now + 1.15);
+
+    tailSource.connect(tailFilter);
+    tailFilter.connect(tailGain);
+    tailGain.connect(context.destination);
+    tailSource.start(now + 0.02);
+
+    // 4. Spaghetti Western Bullet Ricochet Whine
+    if (hasRicochet) {
         const ricoOsc = context.createOscillator();
         const ricoGain = context.createGain();
 
         ricoOsc.type = 'sine';
-        ricoOsc.frequency.setValueAtTime(800, startTime + 0.04);
-        ricoOsc.frequency.exponentialRampToValueAtTime(3200, startTime + 0.12);
-        ricoOsc.frequency.exponentialRampToValueAtTime(1200, startTime + 0.28);
+        ricoOsc.frequency.setValueAtTime(950, now + 0.04);
+        ricoOsc.frequency.exponentialRampToValueAtTime(2800, now + 0.12);
+        ricoOsc.frequency.exponentialRampToValueAtTime(650, now + 0.35);
 
-        ricoGain.gain.setValueAtTime(0, startTime + 0.04);
-        ricoGain.gain.linearRampToValueAtTime(0.09, startTime + 0.07);
-        ricoGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.28);
+        ricoGain.gain.setValueAtTime(0, now + 0.04);
+        ricoGain.gain.linearRampToValueAtTime(0.12, now + 0.08);
+        ricoGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
 
         ricoOsc.connect(ricoGain);
         ricoGain.connect(context.destination);
-
-        ricoOsc.start(startTime + 0.04);
-        ricoOsc.stop(startTime + 0.30);
+        ricoOsc.start(now + 0.04);
+        ricoOsc.stop(now + 0.38);
     }
 }
 
-// Tracked Tone Scheduler
+// Tracked Tone Scheduler for Theme
 function scheduleTrackedTone(context, frequency, startTime, duration, type, gainValue, destinationGain, registerNode) {
     const osc = context.createOscillator();
     const gainNode = context.createGain();
@@ -113,7 +118,7 @@ function scheduleTrackedTone(context, frequency, startTime, duration, type, gain
     registerNode(osc, gainNode);
 }
 
-// Spaghetti Western Theme Loop
+// Spaghetti Western Standoff Theme
 function scheduleWesternLoopTracked(context, startTime, musicGain, registerNode) {
     const beat = 60 / 102;
     const bassNotes = [82.41, 98.00, 110.00, 98.00];
@@ -133,10 +138,8 @@ function scheduleWesternLoopTracked(context, startTime, musicGain, registerNode)
 
         melody.forEach((note) => {
             const noteStart = barStart + note.t * beat;
-            scheduleTrackedTone(context, note.f, noteStart, beat * 0.9, 'square', 0.025, musicGain, registerNode);
+            scheduleTrackedTone(context, note.f, noteStart, beat * 0.9, 'triangle', 0.04, musicGain, registerNode);
         });
-
-        scheduleTrackedTone(context, 146.83, barStart + beat * 3.5, beat * 0.45, 'square', 0.03, musicGain, registerNode);
     }
 }
 
@@ -146,7 +149,6 @@ export function createAudioSystem() {
     let musicTimer = null;
     let musicLoopEnd = 0;
     let musicEnabled = false;
-    let musicMuted = false;
     let activeMusicNodes = [];
     let musicGain = null;
 
@@ -230,7 +232,7 @@ export function createAudioSystem() {
         startMusic() {
             stopMusic();
             const audioContext = ensureContext();
-            if (!audioContext || muted || musicMuted) return;
+            if (!audioContext || muted) return;
 
             musicEnabled = true;
             musicLoopEnd = 0;
@@ -238,6 +240,9 @@ export function createAudioSystem() {
             musicTimer = window.setInterval(scheduleMusic, 1000);
         },
         stopMusic() {
+            stopMusic();
+        },
+        stopAll() {
             stopMusic();
         },
         setMuted(value) {
@@ -262,63 +267,159 @@ export function createAudioSystem() {
         isMuted() {
             return muted;
         },
+
+        // Pocket Watch Ticking (Dual-gear mechanical click)
         playTick(pitchMult = 1.0) {
             if (muted) return;
             const ctx = ensureContext();
             if (!ctx) return;
             const now = ctx.currentTime;
-            scheduleTone(ctx, 1200 * pitchMult, now, 0.015, 'sine', 0.035);
-            scheduleNoiseBurst(ctx, now, 0.01, 0.02);
+
+            const osc = ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(2400 * pitchMult, now);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.012);
+
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.014);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.015);
         },
+
+        // Metallic Hammer Lock / Cocking Draw Signal
         playSignal() {
             if (muted) return;
             const ctx = ensureContext();
             if (!ctx) return;
             const now = ctx.currentTime;
-            scheduleTone(ctx, 440, now, 0.06, 'triangle', 0.08);
-            scheduleTone(ctx, 880, now + 0.05, 0.12, 'square', 0.07);
+
+            // Click 1 (Pawl engagement)
+            const osc1 = ctx.createOscillator();
+            osc1.type = 'triangle';
+            osc1.frequency.setValueAtTime(1800, now);
+            osc1.frequency.exponentialRampToValueAtTime(600, now + 0.025);
+
+            const gain1 = ctx.createGain();
+            gain1.gain.setValueAtTime(0.25, now);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+
+            osc1.connect(gain1);
+            gain1.connect(ctx.destination);
+            osc1.start(now);
+            osc1.stop(now + 0.035);
+
+            // Click 2 (Solid cylinder lock)
+            const osc2 = ctx.createOscillator();
+            osc2.type = 'square';
+            osc2.frequency.setValueAtTime(2600, now + 0.04);
+            osc2.frequency.exponentialRampToValueAtTime(800, now + 0.075);
+
+            const gain2 = ctx.createGain();
+            gain2.gain.setValueAtTime(0.35, now + 0.04);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.start(now + 0.04);
+            osc2.stop(now + 0.085);
         },
+
+        // Player Gunshot (Full Peacemaker blast + Whistle Ricochet)
         playDraw() {
             if (muted) return;
             const ctx = ensureContext();
             if (!ctx) return;
-            playPeacemakerShot(ctx, ctx.currentTime, true);
+            playAuthenticGunshot(ctx, ctx.currentTime, true);
         },
+
+        // Opponent Gunshot (Heavy Body Hit)
         playHit() {
             if (muted) return;
             const ctx = ensureContext();
             if (!ctx) return;
-            playPeacemakerShot(ctx, ctx.currentTime, false);
+            playAuthenticGunshot(ctx, ctx.currentTime, false);
         },
+
+        // Victory Acoustic Motif (Bell Harmonic Chime)
         playVictory() {
             if (muted) return;
             const ctx = ensureContext();
             if (!ctx) return;
             const now = ctx.currentTime;
-            scheduleTone(ctx, 523.25, now, 0.10, 'triangle', 0.07);
-            scheduleTone(ctx, 659.25, now + 0.11, 0.10, 'triangle', 0.07);
-            scheduleTone(ctx, 783.99, now + 0.22, 0.10, 'triangle', 0.07);
-            scheduleTone(ctx, 1046.50, now + 0.33, 0.25, 'triangle', 0.08);
+
+            [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + i * 0.1);
+
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0.18, now + i * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.6);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.65);
+            });
         },
+
+        // Loss Thud & Resonant Drop
         playLoss() {
             if (muted) return;
             const ctx = ensureContext();
             if (!ctx) return;
             const now = ctx.currentTime;
-            playPeacemakerShot(ctx, now, false);
-            scheduleTone(ctx, 311.13, now + 0.06, 0.16, 'sawtooth', 0.05, -30);
-            scheduleTone(ctx, 293.66, now + 0.18, 0.22, 'sawtooth', 0.05, -45);
-            scheduleTone(ctx, 146.83, now + 0.32, 0.38, 'sawtooth', 0.06, -60);
+
+            playAuthenticGunshot(ctx, now, false);
+
+            // Body Thud impact
+            const thudOsc = ctx.createOscillator();
+            thudOsc.type = 'sine';
+            thudOsc.frequency.setValueAtTime(110, now + 0.15);
+            thudOsc.frequency.exponentialRampToValueAtTime(28, now + 0.45);
+
+            const thudGain = ctx.createGain();
+            thudGain.gain.setValueAtTime(0.65, now + 0.15);
+            thudGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+            thudOsc.connect(thudGain);
+            thudGain.connect(ctx.destination);
+            thudOsc.start(now + 0.15);
+            thudOsc.stop(now + 0.52);
         },
+
+        // Rapid Metallic Cylinder Spin with Decreasing Rate of Clicks
         playCylinderSpin() {
             if (muted) return;
             const ctx = ensureContext();
             if (!ctx) return;
             const now = ctx.currentTime;
-            for (let i = 0; i < 6; i++) {
-                const clickTime = now + i * 0.042;
-                scheduleTone(ctx, 1600 + i * 120, clickTime, 0.012, 'square', 0.035);
-                scheduleNoiseBurst(ctx, clickTime, 0.008, 0.03);
+
+            const clickCount = 10;
+            let currentDelay = 0;
+
+            for (let i = 0; i < clickCount; i++) {
+                currentDelay += 0.022 + Math.pow(i / clickCount, 2) * 0.045;
+                const clickTime = now + currentDelay;
+
+                const osc = ctx.createOscillator();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(2800 + Math.random() * 300, clickTime);
+                osc.frequency.exponentialRampToValueAtTime(1100, clickTime + 0.012);
+
+                const gain = ctx.createGain();
+                const vol = (1 - (i / clickCount) * 0.4) * 0.18;
+                gain.gain.setValueAtTime(vol, clickTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, clickTime + 0.014);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(clickTime);
+                osc.stop(clickTime + 0.016);
             }
         },
     };
