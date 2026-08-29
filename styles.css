@@ -654,3 +654,70 @@ canvas {
         padding: 4px 10px;
     }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+    .app-shell {
+        padding: 4px 8px;
+    }
+
+    .screen--game {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto 1fr auto;
+        column-gap: 12px;
+        row-gap: 4px;
+        height: 100dvh;
+        max-height: 100dvh;
+    }
+
+    /* Keep HUD compact along the top */
+    .hud {
+        grid-column: 1;
+        grid-row: 1;
+        width: 100%;
+        gap: 6px;
+    }
+
+    .hud>div {
+        padding: 2px 6px;
+    }
+
+    /* Allow canvas to fill remaining height */
+    .arena-frame {
+        grid-column: 1;
+        grid-row: 2;
+        width: 100%;
+        height: 100%;
+    }
+
+    canvas {
+        max-height: calc(100dvh - 90px);
+        width: auto;
+        aspect-ratio: 16 / 9;
+    }
+
+    /* Place controls on the right side for thumb reach */
+    .controls {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 140px;
+    }
+
+    .draw-button {
+        min-height: 80px;
+        width: 100%;
+    }
+
+    .hint {
+        display: none;
+        /* Hide non-essential text to save space */
+    }
+
+    .utility-bar {
+        grid-column: 1 / -1;
+        grid-row: 3;
+    }
+}
