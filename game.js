@@ -13,7 +13,6 @@ const phases = {
     gameOver: 'gameOver',
 };
 
-// Factory Default Ephemeral Presets (RAM only)
 const DEFAULT_SCORES = [
     { initials: 'BLD', bountyTotal: 588100 },
     { initials: 'COL', bountyTotal: 338100 },
@@ -111,6 +110,23 @@ export function createGame(dom) {
         entrySlot: 0,
         initials: ['A', 'A', 'A'],
     };
+
+    function checkOrientation() {
+        const warningEl = document.getElementById('orientationWarning');
+        if (!warningEl) return;
+
+        const isMobileOrTablet = window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 900 || window.innerHeight <= 900;
+        const isLandscape = window.innerWidth > window.innerHeight;
+
+        if (isMobileOrTablet && isLandscape && window.innerHeight < 600) {
+            warningEl.hidden = false;
+        } else {
+            warningEl.hidden = true;
+        }
+    }
+
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
 
     function isActivePhase() {
         return state.phase === phases.countdown || state.phase === phases.duel || state.phase === phases.roundWin;
@@ -540,7 +556,6 @@ export function createGame(dom) {
             state.progress = state.tension;
             state.countdownProgress = clamp(1 - state.tension, 0, 1);
 
-            // Drive 3D Countdown Tension Bar UI
             if (dom.timerFill) {
                 dom.timerFill.style.width = `${(state.countdownProgress * 100).toFixed(1)}%`;
             }
@@ -570,7 +585,6 @@ export function createGame(dom) {
                 audio.playSignal();
             }
         } else {
-            // Hide the meter in other phases
             if (dom.timerTrack && state.phase !== phases.duel) {
                 dom.timerTrack.hidden = true;
             }
@@ -597,6 +611,7 @@ export function createGame(dom) {
     }
 
     function boot() {
+        checkOrientation();
         startMenu(true);
         state.animationFrame = window.requestAnimationFrame(tick);
     }

@@ -655,17 +655,22 @@ canvas {
     }
 }
 
-/* --- PORTRAIT ONLY ENFORCEMENT FOR MOBILE --- */
+/* --- PORTRAIT ONLY OVERLAY FOR MOBILE --- */
 .orientation-warning {
-    display: none;
+    display: flex;
     position: fixed;
     inset: 0;
     z-index: 99999;
     background: rgba(7, 11, 20, 0.96);
     backdrop-filter: blur(8px);
-    place-items: center;
+    align-items: center;
+    justify-content: center;
     padding: 24px;
     text-align: center;
+}
+
+.orientation-warning[hidden] {
+    display: none !important;
 }
 
 .orientation-card {
@@ -709,12 +714,5 @@ canvas {
 
     100% {
         transform: rotate(90deg);
-    }
-}
-
-/* Trigger overlay only on short landscape screens (phones & small tablets) */
-@media (orientation: landscape) and (max-height: 540px) {
-    .orientation-warning {
-        display: grid;
     }
 }
