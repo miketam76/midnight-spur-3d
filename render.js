@@ -1,4 +1,4 @@
-// render.js - Midnight Spur: Stylized Nintendo / Mario-Style Western Caricature Engine
+// render.js - Midnight Spur: Authentic Leone Roster (Tuco, Groggy, Cavenaugh, Indio, Eastwood, Van Cleef)
 import * as THREE from 'three';
 
 export function createRenderer(canvas) {
@@ -20,7 +20,7 @@ export function createRenderer(canvas) {
 
     const toonMat = (color) => new THREE.MeshLambertMaterial({ color, flatShading: true });
 
-    // 2. Dynamic Lighting Setup
+    // 2. Lighting Setup
     const ambientLight = new THREE.AmbientLight(0xf4e6d0, 0.90);
     scene.add(ambientLight);
 
@@ -218,30 +218,39 @@ export function createRenderer(canvas) {
         let hatColor = outfit.hat || '#543622';
         let torsoColor = outfit.body || '#a46034';
         let hasHat = true;
-        let isSombrero = false;
-        let hasGoatee = false;
         let hasMustache = true;
-        let hasCigar = false;
+        let hasNoose = false;
+        let isUnibrow = false;
 
         if (name.includes('TUCO')) {
-            isSombrero = true;
-            hairColor = '#382010';
-            skinColor = '#e0a068';
+            hasHat = false;
+            hairColor = '#241a14';
+            skinColor = '#de9a68';
+            torsoColor = '#dcd6ca';
+            hasNoose = true;
+        } else if (name.includes('GROGGY')) {
+            hasHat = true;
+            hatColor = '#121418';
+            hairColor = '#18120e';
+            skinColor = '#d89464';
+            torsoColor = '#26282e';
+            isUnibrow = true;
+            hasMustache = false;
+        } else if (name.includes('CAVENAUGH')) {
+            hasHat = false;
+            hairColor = '#a86230';
+            skinColor = '#e29e70';
+            torsoColor = '#c49a38';
+            hasMustache = false;
         } else if (name.includes('INDIO')) {
             hasHat = false;
-            hairColor = '#6a6d78';
-            torsoColor = '#1a1c24';
-            hasMustache = false;
-        } else if (outlaw.isBlondie || name.includes('NO NAME')) {
-            hasCigar = true;
+            hairColor = '#3a3d46';
+            torsoColor = '#ded8c8';
+        } else if (outlaw.isBlondie || name.includes('NO NAME') || name.includes('EASTWOOD')) {
+            hasHat = true;
             hairColor = '#5a3c24';
             hatColor = '#48301c';
-            torsoColor = '#486c42';
-        } else if (name.includes('BLACK')) {
-            hatColor = '#111116';
-            torsoColor = '#161820';
-            hairColor = '#0e0e12';
-            hasGoatee = true;
+            torsoColor = '#385634';
         }
 
         pctx.fillStyle = '#e8d4a6';
@@ -277,6 +286,11 @@ export function createRenderer(canvas) {
         drawPixelRect(cx - 88, cy + 85, 176, 60, torsoColor);
         drawPixelRect(cx - 24, cy + 85, 48, 50, '#dedee8');
 
+        if (hasNoose) {
+            drawPixelRect(cx - 32, cy + 70, 64, 12, '#bca47a');
+            drawPixelRect(cx + 12, cy + 80, 12, 40, '#a8926a');
+        }
+
         drawPixelRect(cx - 56, cy - 25, 112, 115, skinColor);
         drawPixelRect(cx - 68, cy + 15, 12, 35, skinColor);
         drawPixelRect(cx + 56, cy + 15, 12, 35, skinColor);
@@ -285,42 +299,33 @@ export function createRenderer(canvas) {
         drawPixelRect(cx + 42, cy - 25, 14, 55, hairColor);
 
         if (!hasHat) {
-            drawPixelRect(cx - 58, cy - 55, 116, 32, hairColor);
-            drawPixelRect(cx - 62, cy - 25, 12, 85, hairColor);
-            drawPixelRect(cx + 50, cy - 25, 12, 85, hairColor);
+            drawPixelRect(cx - 62, cy - 65, 124, 45, hairColor);
+            drawPixelRect(cx - 66, cy - 30, 20, 85, hairColor);
+            drawPixelRect(cx + 46, cy - 30, 20, 85, hairColor);
         }
 
-        drawPixelRect(cx - 38, cy + 2, 28, 7, hairColor);
-        drawPixelRect(cx + 10, cy + 2, 28, 7, hairColor);
+        if (isUnibrow) {
+            drawPixelRect(cx - 42, cy + 2, 84, 10, hairColor);
+        } else {
+            drawPixelRect(cx - 38, cy + 2, 28, 7, hairColor);
+            drawPixelRect(cx + 10, cy + 2, 28, 7, hairColor);
+        }
 
         drawPixelRect(cx - 36, cy + 12, 24, 12, '#ffffff');
         drawPixelRect(cx + 12, cy + 12, 24, 12, '#ffffff');
         drawPixelRect(cx - 28, cy + 12, 12, 12, '#111116');
         drawPixelRect(cx + 16, cy + 12, 12, 12, '#111116');
 
-        // Mario-style big rounded nose
         drawPixelRect(cx - 16, cy + 24, 32, 28, skinColor);
         drawPixelRect(cx - 18, cy + 28, 36, 20, '#d89464');
 
         if (hasMustache) drawPixelRect(cx - 40, cy + 54, 80, 16, hairColor);
         drawPixelRect(cx - 16, cy + 74, 32, 5, '#541c14');
-        if (hasGoatee) drawPixelRect(cx - 10, cy + 79, 20, 15, hairColor);
-
-        if (hasCigar) {
-            drawPixelRect(cx + 12, cy + 64, 30, 8, '#3d2010');
-            drawPixelRect(cx + 42, cy + 64, 8, 8, '#ff4411');
-        }
 
         if (hasHat) {
-            if (isSombrero) {
-                drawPixelRect(cx - 140, cy - 30, 280, 20, hatColor);
-                drawPixelRect(cx - 65, cy - 75, 130, 48, hatColor);
-                drawPixelRect(cx - 65, cy - 35, 130, 8, '#be9458');
-            } else {
-                drawPixelRect(cx - 110, cy - 30, 220, 16, hatColor);
-                drawPixelRect(cx - 52, cy - 65, 104, 38, hatColor);
-                drawPixelRect(cx - 52, cy - 32, 104, 6, '#b8281e');
-            }
+            drawPixelRect(cx - 110, cy - 30, 220, 16, hatColor);
+            drawPixelRect(cx - 52, cy - 65, 104, 38, hatColor);
+            drawPixelRect(cx - 52, cy - 32, 104, 6, '#b8281e');
         }
 
         pctx.fillStyle = '#382012';
@@ -340,24 +345,25 @@ export function createRenderer(canvas) {
         posterTexture.needsUpdate = true;
     }
 
-    // 6. Mario / Nintendo-Style Stylized Character Sculptor
+    // 6. Mario / Nintendo-Style Character Sculptor
     function createDetailedVoxelCowboy(isHero = false) {
         const root = new THREE.Group();
 
         root.mats = {
-            skin: toonMat(isHero ? 0xf4b48a : 0xebb082),
-            nose: toonMat(isHero ? 0xe59b70 : 0xdb9468),
-            hat: toonMat(isHero ? 0x1a1e28 : 0x543622),
-            torso: toonMat(isHero ? 0x222a3a : 0xa46034),
-            accent: toonMat(isHero ? 0xc83226 : 0xe8cf8c),
-            pants: toonMat(isHero ? 0x161a22 : 0x2c4468),
-            boots: toonMat(0x1a140e),
-            glove: toonMat(isHero ? 0xf0efe8 : 0xd8c29d),
+            skin: toonMat(isHero ? 0xebaf84 : 0xebb082),
+            nose: toonMat(isHero ? 0xde9b70 : 0xdb9468),
+            hat: toonMat(isHero ? 0x111318 : 0x543622),
+            torso: toonMat(isHero ? 0x1c2028 : 0xa46034),
+            accent: toonMat(isHero ? 0xeae6dc : 0xe8cf8c),
+            pants: toonMat(isHero ? 0x14161c : 0x2c4468),
+            boots: toonMat(0x16120e),
+            glove: toonMat(isHero ? 0x1c1612 : 0xecd8be),
             gold: toonMat(0xf4c038),
             silver: toonMat(0xb8c0cc),
-            hair: toonMat(isHero ? 0x22140a : 0x482a16),
+            rope: toonMat(0xbca67c),
+            hair: toonMat(isHero ? 0x4a4c52 : 0x482a16),
             eyeWhite: toonMat(0xffffff),
-            iris: toonMat(isHero ? 0x2864b0 : 0x4e2c14),
+            iris: toonMat(isHero ? 0x382c22 : 0x4e2c14),
             pupil: toonMat(0x0a0c10),
             cigar: toonMat(0x482410),
             cigarTip: new THREE.MeshBasicMaterial({ color: 0xff4411 }),
@@ -366,24 +372,24 @@ export function createRenderer(canvas) {
             ejectorRod: toonMat(0x121418),
             brassTrigger: toonMat(0xc49a45),
             walnutGrip: toonMat(0x381e0e),
+            leatherDark: toonMat(0x281c14),
         };
 
-        // --- LOWER BODY: CHUNKY LEGS & BOOTS (Mario Style) ---
+        // --- LOWER BODY ---
         function createToonLeg(xOffset) {
             const legGroup = new THREE.Group();
             legGroup.position.set(xOffset, 0.58, 0);
 
-            // Sturdy tapered leg
-            const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.115, 0.10, 0.55, 32), root.mats.pants);
-            leg.position.y = -0.27;
-            leg.castShadow = true;
-            legGroup.add(leg);
+            const legMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.115, 0.095, 0.55, 32), root.mats.pants);
+            legMesh.position.y = -0.27;
+            legMesh.castShadow = true;
+            legGroup.add(legMesh);
+            legGroup.legMesh = legMesh;
 
-            // Big rounded boot
             const bootGroup = new THREE.Group();
             bootGroup.position.set(0, -0.56, 0);
 
-            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.10, 0.12, 32), root.mats.boots);
+            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.10, 0.14, 32), root.mats.boots);
             const toe = new THREE.Mesh(new THREE.SphereGeometry(0.115, 32, 16), root.mats.boots);
             toe.position.set(0, -0.04, 0.08);
             toe.scale.set(1.0, 0.75, 1.25);
@@ -396,6 +402,7 @@ export function createRenderer(canvas) {
 
             bootGroup.add(shaft, toe, heel, spur);
             legGroup.add(bootGroup);
+            legGroup.bootGroup = bootGroup;
 
             return legGroup;
         }
@@ -406,18 +413,17 @@ export function createRenderer(canvas) {
         root.legL = legL;
         root.legR = legR;
 
-        // --- TORSO: ROUNDED BARREL CHEST & WAIST ---
+        // --- TORSO ---
         const torsoGroup = new THREE.Group();
         torsoGroup.position.set(0, 0.58, 0);
 
-        // Rounded spherical belly/chest blend
         const chest = new THREE.Mesh(new THREE.SphereGeometry(0.32, 32, 24), root.mats.torso);
         chest.position.y = 0.38;
         chest.scale.set(1.05, 1.15, 0.88);
         chest.castShadow = true;
         torsoGroup.add(chest);
+        root.chest = chest;
 
-        // Chunky Leather Belt & Big Buckle
         const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.29, 0.09, 32), toonMat(0x3a1a0c));
         belt.position.y = 0.10;
         const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.09, 0.32), root.mats.gold);
@@ -427,14 +433,69 @@ export function createRenderer(canvas) {
         holster.position.set(0.28, 0.04, 0.04);
         holster.rotation.z = -0.18;
         torsoGroup.add(belt, buckle, holster);
+        root.holster = holster;
 
-        // Poncho Trim
         const overlay = new THREE.Mesh(new THREE.CylinderGeometry(0.31, 0.28, 0.24, 32), root.mats.accent);
         overlay.position.y = 0.50;
         torsoGroup.add(overlay);
         root.overlay = overlay;
 
-        // Short stout neck
+        // Hero: Pale White Shirt Collar & Bolo Tie
+        const heroTie = new THREE.Group();
+        const tieClasp = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.045, 0.03), root.mats.silver);
+        tieClasp.position.set(0, 0.62, 0.26);
+        const tieL = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.18, 8), root.mats.leatherDark);
+        tieL.position.set(-0.012, 0.52, 0.26);
+        tieL.rotation.z = -0.08;
+        const tieR = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.18, 8), root.mats.leatherDark);
+        tieR.position.set(0.012, 0.52, 0.26);
+        tieR.rotation.z = 0.08;
+        heroTie.add(tieClasp, tieL, tieR);
+        heroTie.visible = isHero;
+        torsoGroup.add(heroTie);
+        root.heroTie = heroTie;
+
+        // Tuco: Hangman's Noose Around Neck
+        const nooseGroup = new THREE.Group();
+        const nooseRope = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.024, 16, 32), root.mats.rope);
+        nooseRope.position.set(0, 0.68, 0.04);
+        nooseRope.rotation.x = Math.PI / 2.3;
+        const nooseKnot = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.03, 0.08, 16), root.mats.rope);
+        nooseKnot.position.set(-0.11, 0.63, 0.11);
+        const nooseTail = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.22, 12), root.mats.rope);
+        nooseTail.position.set(-0.11, 0.50, 0.13);
+        nooseTail.rotation.z = 0.15;
+        nooseGroup.add(nooseRope, nooseKnot, nooseTail);
+        nooseGroup.visible = false;
+        torsoGroup.add(nooseGroup);
+        root.nooseGroup = nooseGroup;
+
+        // Eastwood Poncho Shoulder Drape
+        const ponchoFlap = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.36, 0.18), root.mats.accent);
+        ponchoFlap.position.set(-0.18, 0.52, 0.02);
+        ponchoFlap.rotation.set(0.1, 0.15, 0.2);
+        ponchoFlap.visible = false;
+        torsoGroup.add(ponchoFlap);
+        root.ponchoFlap = ponchoFlap;
+
+        // El Indio Diagonal Ammo Bandolier
+        const bandolier = new THREE.Group();
+        const strap = new THREE.Mesh(new THREE.CylinderGeometry(0.33, 0.33, 0.08, 32), root.mats.leatherDark);
+        strap.position.y = 0.38;
+        strap.rotation.z = 0.65;
+        strap.scale.set(1.05, 1.0, 0.9);
+        bandolier.add(strap);
+
+        for (let b = 0; b < 7; b++) {
+            const bullet = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.06, 12), root.mats.gold);
+            bullet.position.set(-0.16 + b * 0.05, 0.25 + b * 0.035, 0.26 - Math.abs(b - 3) * 0.03);
+            bullet.rotation.z = -0.9;
+            bandolier.add(bullet);
+        }
+        bandolier.visible = false;
+        torsoGroup.add(bandolier);
+        root.bandolier = bandolier;
+
         const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.11, 0.12, 32), root.mats.skin);
         neck.position.set(0, 0.72, 0);
         torsoGroup.add(neck);
@@ -442,18 +503,17 @@ export function createRenderer(canvas) {
         root.add(torsoGroup);
         root.torsoGroup = torsoGroup;
 
-        // --- HEAD: MARIO-STYLE PROPORTIONAL BULBOUS FACIAL SCULPT ---
+        // --- HEAD ---
         const headGroup = new THREE.Group();
         headGroup.position.set(0, 1.45, 0);
 
-        // 1. Big Spherical Head
         const headSphere = new THREE.Mesh(new THREE.SphereGeometry(0.26, 36, 28), root.mats.skin);
         headSphere.position.set(0, 0.14, 0);
         headSphere.scale.set(1.05, 1.0, 1.08);
         headSphere.castShadow = true;
         headGroup.add(headSphere);
+        root.headSphere = headSphere;
 
-        // 2. Signature Mario-Style Bulbous Nose (Protruding outward!)
         const noseGroup = new THREE.Group();
         noseGroup.position.set(0, 0.14, 0.26);
 
@@ -462,8 +522,9 @@ export function createRenderer(canvas) {
         noseGroup.add(nose);
         headGroup.add(noseGroup);
         root.noseGroup = noseGroup;
+        root.nose = nose;
 
-        // 3. Curved Low-Poly Mustache Arch (Rests right under the nose)
+        // Facial Hair & Jaw-Beard System
         const mustacheGroup = new THREE.Group();
         mustacheGroup.position.set(0, 0.07, 0.24);
 
@@ -477,36 +538,44 @@ export function createRenderer(canvas) {
         stacheR.scale.set(1.2, 0.55, 0.8);
         stacheR.rotation.z = -0.25;
 
-        const goatee = new THREE.Mesh(new THREE.SphereGeometry(0.045, 20, 14), root.mats.hair);
-        goatee.position.set(0, -0.08, -0.04);
-        goatee.scale.set(1.0, 0.7, 0.9);
+        const goatee = new THREE.Mesh(new THREE.SphereGeometry(0.07, 24, 16), root.mats.hair);
+        goatee.position.set(0, -0.09, -0.02);
+        goatee.scale.set(1.0, 0.9, 1.0);
 
-        mustacheGroup.add(stacheL, stacheR, goatee);
+        const jawBeardL = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.07, 0.22, 16), root.mats.hair);
+        jawBeardL.position.set(-0.16, -0.04, -0.08);
+        jawBeardL.rotation.z = 0.55;
+
+        const jawBeardR = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.07, 0.22, 16), root.mats.hair);
+        jawBeardR.position.set(0.16, -0.04, -0.08);
+        jawBeardR.rotation.z = -0.55;
+
+        mustacheGroup.add(stacheL, stacheR, goatee, jawBeardL, jawBeardR);
         headGroup.add(mustacheGroup);
         root.mustache = mustacheGroup;
+        root.stacheL = stacheL;
+        root.stacheR = stacheR;
         root.goatee = goatee;
+        root.jawBeardL = jawBeardL;
+        root.jawBeardR = jawBeardR;
 
-        // 4. Clean Almond Eyes (White Sclera + Colored Iris + Pupil + Specular Glint)
+        // Eyes
         function createToonEye(x) {
             const eye = new THREE.Group();
             eye.position.set(x, 0.22, 0.22);
             eye.rotation.y = x > 0 ? 0.22 : -0.22;
 
-            // Eye White
             const white = new THREE.Mesh(new THREE.SphereGeometry(0.048, 24, 18), root.mats.eyeWhite);
             white.scale.set(0.85, 1.25, 0.45);
 
-            // Iris
             const iris = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.005, 24), root.mats.iris);
             iris.position.set(x > 0 ? 0.004 : -0.004, 0, 0.022);
             iris.rotation.x = Math.PI / 2;
 
-            // Pupil
             const pupil = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.006, 20), root.mats.pupil);
             pupil.position.set(x > 0 ? 0.004 : -0.004, 0, 0.024);
             pupil.rotation.x = Math.PI / 2;
 
-            // White Catchlight / Glint
             const glint = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.007, 12), root.mats.eyeWhite);
             glint.position.set(x > 0 ? 0.010 : 0.002, 0.008, 0.025);
             glint.rotation.x = Math.PI / 2;
@@ -515,9 +584,13 @@ export function createRenderer(canvas) {
             return eye;
         }
 
-        headGroup.add(createToonEye(-0.09), createToonEye(0.09));
+        const eyeL = createToonEye(-0.09);
+        const eyeR = createToonEye(0.09);
+        headGroup.add(eyeL, eyeR);
+        root.eyeL = eyeL;
+        root.eyeR = eyeR;
 
-        // 5. Arched Eyebrows (Resting above eyes)
+        // Eyebrows & Groggy Unibrow
         const browL = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.012, 0.09, 16), root.mats.hair);
         browL.position.set(-0.095, 0.29, 0.20);
         browL.rotation.set(-0.15, 0.22, Math.PI / 2 - 0.25);
@@ -526,9 +599,18 @@ export function createRenderer(canvas) {
         browR.position.set(0.095, 0.29, 0.20);
         browR.rotation.set(-0.15, -0.22, Math.PI / 2 + 0.25);
 
-        headGroup.add(browL, browR);
+        // Groggy's Heavy Unibrow Bridge Bar
+        const unibrowBridge = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.08, 16), root.mats.hair);
+        unibrowBridge.position.set(0, 0.28, 0.23);
+        unibrowBridge.rotation.z = Math.PI / 2;
+        unibrowBridge.visible = false;
 
-        // 6. Rounded Ears
+        headGroup.add(browL, browR, unibrowBridge);
+        root.browL = browL;
+        root.browR = browR;
+        root.unibrowBridge = unibrowBridge;
+
+        // Ears & Sideburns
         const earL = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.02, 24), root.mats.skin);
         earL.position.set(-0.27, 0.14, -0.02);
         earL.rotation.z = Math.PI / 2;
@@ -538,9 +620,17 @@ export function createRenderer(canvas) {
         earR.position.set(0.27, 0.14, -0.02);
         earR.rotation.z = -Math.PI / 2;
         earR.rotation.y = -0.2;
-        headGroup.add(earL, earR);
 
-        // 7. Stetson Hat (Sits naturally on the spherical crown)
+        const sideburnL = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.14, 0.06), root.mats.hair);
+        sideburnL.position.set(-0.25, 0.13, 0.05);
+        const sideburnR = sideburnL.clone();
+        sideburnR.position.set(0.25, 0.13, 0.05);
+
+        headGroup.add(earL, earR, sideburnL, sideburnR);
+        root.sideburnL = sideburnL;
+        root.sideburnR = sideburnR;
+
+        // Hat
         const hatGroup = new THREE.Group();
         hatGroup.position.set(0, 0.30, 0);
 
@@ -559,13 +649,37 @@ export function createRenderer(canvas) {
         headGroup.add(hatGroup);
         root.hatGroup = hatGroup;
         root.hatBrim = brim;
+        root.hatCrown = crown;
+        root.hatBand = band;
 
-        // Hair Cap
+        // Curly/Wild Hair Layer (Indio / Tuco / Cavenaugh)
         const hairLayer = new THREE.Group();
-        hairLayer.position.set(0, 0.16, 0);
-        const hairTop = new THREE.Mesh(new THREE.SphereGeometry(0.27, 28, 20), root.mats.hair);
-        hairTop.scale.set(1.06, 1.05, 1.12);
-        hairLayer.add(hairTop);
+        hairLayer.position.set(0, 0.14, -0.02);
+
+        const curlDefs = [
+            [0.0, 0.16, 0.04, 0.11, 0.10, 0.11],
+            [-0.09, 0.14, 0.02, 0.10, 0.10, 0.10],
+            [0.09, 0.14, 0.02, 0.10, 0.10, 0.10],
+            [-0.14, 0.12, -0.05, 0.09, 0.09, 0.10],
+            [0.14, 0.12, -0.05, 0.09, 0.09, 0.10],
+            [-0.07, 0.12, 0.17, 0.065, 0.065, 0.065],
+            [0.05, 0.11, 0.18, 0.060, 0.060, 0.060],
+            [-0.22, 0.06, -0.04, 0.085, 0.085, 0.09],
+            [0.22, 0.06, -0.04, 0.085, 0.085, 0.09],
+            [-0.20, -0.02, -0.08, 0.080, 0.080, 0.085],
+            [0.20, -0.02, -0.08, 0.080, 0.080, 0.085],
+            [0.0, 0.04, -0.18, 0.12, 0.12, 0.12],
+            [-0.10, -0.02, -0.16, 0.09, 0.09, 0.09],
+            [0.10, -0.02, -0.16, 0.09, 0.09, 0.09]
+        ];
+
+        curlDefs.forEach(([cx, cy, cz, sx, sy, sz]) => {
+            const curl = new THREE.Mesh(new THREE.DodecahedronGeometry(sx, 1), root.mats.hair);
+            curl.position.set(cx, cy, cz);
+            curl.scale.set(sx / 0.1, sy / 0.1, sz / 0.1);
+            hairLayer.add(curl);
+        });
+
         hairLayer.visible = false;
         headGroup.add(hairLayer);
         root.hairLayer = hairLayer;
@@ -586,7 +700,7 @@ export function createRenderer(canvas) {
         root.add(headGroup);
         root.headGroup = headGroup;
 
-        // --- ARMS & GLOVED HANDS (Mario-Style White Gloves) ---
+        // --- ARMS & PEACEMAKER ---
         const armLeftGroup = new THREE.Group();
         armLeftGroup.position.set(-0.35, 1.25, 0);
 
@@ -595,7 +709,6 @@ export function createRenderer(canvas) {
         bicepL.castShadow = true;
         armLeftGroup.add(bicepL);
 
-        // Chunky Glove
         const gloveL = new THREE.Mesh(new THREE.SphereGeometry(0.09, 24, 18), root.mats.glove);
         gloveL.position.set(0, -0.42, 0);
         gloveL.scale.set(1.1, 1.2, 0.9);
@@ -615,7 +728,6 @@ export function createRenderer(canvas) {
         gloveR.scale.set(1.1, 1.2, 0.9);
         armRightGroup.add(gloveR);
 
-        // Stylized Blued Peacemaker Revolver
         const gun = new THREE.Group();
         gun.position.set(0, -0.44, 0.12);
         gun.rotation.x = Math.PI / 2;
@@ -658,6 +770,53 @@ export function createRenderer(canvas) {
         root.add(armRightGroup);
         root.armRightGroup = armRightGroup;
         root.gun = gun;
+
+        // --- ACCURATE LEE VAN CLEEF (COLONEL MORTIMER) PRESET ---
+        if (isHero) {
+            // Lean, severe military gunslinger silhouette
+            root.chest.scale.set(0.90, 1.28, 0.82);
+            root.headSphere.scale.set(0.94, 1.06, 1.0);
+
+            // Classic Mario-style sphere nose, scaled down to a compact, neat profile
+            root.noseGroup.position.set(0, 0.14, 0.25);
+            root.nose.scale.set(0.68, 0.62, 0.72); // ~35% smaller than the default
+            root.nose.position.set(0, 0, 0);
+
+            // Neat salt-and-pepper pencil mustache tucked right under the nose
+            root.mustache.position.set(0, 0.07, 0.24);
+            root.stacheL.scale.set(1.05, 0.25, 0.45);
+            root.stacheR.scale.set(1.05, 0.25, 0.45);
+            root.stacheL.position.set(-0.055, 0, 0.01);
+            root.stacheR.position.set(0.055, 0, 0.01);
+            root.stacheL.rotation.z = 0.08;
+            root.stacheR.rotation.z = -0.08;
+            root.goatee.visible = false;
+            root.jawBeardL.visible = false;
+            root.jawBeardR.visible = false;
+
+            // Piercing razor squint
+            root.eyeL.scale.set(0.95, 0.45, 0.9);
+            root.eyeR.scale.set(0.95, 0.45, 0.9);
+            root.eyeL.position.set(-0.085, 0.21, 0.23);
+            root.eyeR.position.set(0.085, 0.21, 0.23);
+            root.browL.rotation.set(-0.25, 0.22, Math.PI / 2 - 0.48);
+            root.browR.rotation.set(-0.25, -0.22, Math.PI / 2 + 0.48);
+
+            // Low-crowned planter Stetson with wide circular flat brim
+            root.hatBrim.scale.set(1.28, 0.85, 1.35);
+            root.hatCrown.scale.set(0.98, 0.55, 1.0);
+            root.hatCrown.position.set(0, 0.06, -0.01);
+            root.hatBand.scale.set(1.01, 0.55, 1.01);
+            root.hatBand.position.set(0, 0.015, -0.01);
+
+            // Dark Mortimer palette
+            root.mats.hat.color.setHex(0x101216);
+            root.mats.torso.color.setHex(0x181c24);
+            root.mats.accent.color.setHex(0xe8e4dc);
+            root.mats.pants.color.setHex(0x121418);
+            root.mats.glove.color.setHex(0x1c1814);
+            root.mats.hair.color.setHex(0x565860); // Salt & pepper gray
+        }
 
         return root;
     }
@@ -741,40 +900,184 @@ export function createRenderer(canvas) {
             updateWantedPoster(outlaw);
         }
 
+        // Base Reset
         opponent.hatGroup.visible = true;
         opponent.hairLayer.visible = false;
         opponent.cigarGroup.visible = false;
+        opponent.ponchoFlap.visible = false;
+        opponent.bandolier.visible = false;
+        opponent.nooseGroup.visible = false;
         opponent.mustache.visible = true;
+        opponent.stacheL.visible = true;
+        opponent.stacheR.visible = true;
         opponent.goatee.visible = false;
+        opponent.jawBeardL.visible = false;
+        opponent.jawBeardR.visible = false;
+        opponent.unibrowBridge.visible = false;
+
+        opponent.chest.scale.set(1.05, 1.15, 0.88);
+        opponent.headSphere.scale.set(1.05, 1.0, 1.08);
+        opponent.nose.scale.set(1.15, 0.95, 1.1);
+        opponent.nose.position.set(0, 0, 0);
+        opponent.legL.legMesh.scale.set(1.0, 1.0, 1.0);
+        opponent.legR.legMesh.scale.set(1.0, 1.0, 1.0);
         opponent.hatBrim.scale.set(1.0, 1.0, 1.25);
+        opponent.hatCrown.scale.set(1.0, 1.0, 1.0);
+        opponent.hatCrown.position.set(0, 0.11, -0.02);
+        opponent.stacheL.scale.set(1.2, 0.55, 0.8);
+        opponent.stacheR.scale.set(1.2, 0.55, 0.8);
+        opponent.hatGroup.rotation.set(0, 0, 0);
+        opponent.browL.rotation.set(-0.15, 0.22, Math.PI / 2 - 0.25);
+        opponent.browR.rotation.set(-0.15, -0.22, Math.PI / 2 + 0.25);
+        opponent.sideburnL.scale.set(1.0, 1.0, 1.0);
+        opponent.sideburnR.scale.set(1.0, 1.0, 1.0);
 
         opponent.mats.hat.color.setStyle(outfit.hat || '#543622');
         opponent.mats.torso.color.setStyle(outfit.body || '#a46034');
         opponent.mats.accent.color.setStyle(outfit.accent || '#e8cf8c');
+        opponent.mats.pants.color.setHex(0x2c4468);
+        opponent.mats.hair.color.setHex(0x3c2214);
+        opponent.mats.glove.color.setHex(0xecd8be);
+        opponent.mats.iris.color.setHex(0x4e2c14);
 
+        // --- 1. TUCO (Eli Wallach: Hatless, Hangman's Noose, Sweeping Black Hair, Gritty Henley) ---
         if (name.includes('TUCO')) {
-            opponent.hatBrim.scale.set(1.40, 1.0, 1.40);
-            opponent.mats.hair.color.setHex(0x382010);
-            opponent.mats.pants.color.setHex(0x4a3c28);
-        } else if (name.includes('INDIO')) {
             opponent.hatGroup.visible = false;
             opponent.hairLayer.visible = true;
-            opponent.mats.hair.color.setHex(0x6a6d78);
-            opponent.mats.torso.color.setHex(0x1a1c24);
-            opponent.mats.accent.color.setHex(0xf4be34);
+            opponent.nooseGroup.visible = true; // Hangman's noose looped around neck
+
+            opponent.chest.scale.set(1.30, 1.15, 1.15); // Stocky, muscular barrel
+            opponent.headSphere.scale.set(1.10, 1.02, 1.10);
+            opponent.nose.scale.set(1.25, 0.95, 1.30); // Broad, crooked boxer nose
+            opponent.legL.legMesh.scale.set(1.15, 0.90, 1.15);
+            opponent.legR.legMesh.scale.set(1.15, 0.90, 1.15);
+
+            // Swept-up black messy curls
+            opponent.mats.hair.color.setHex(0x221814);
+            opponent.sideburnL.scale.set(1.2, 1.4, 1.2);
+            opponent.sideburnR.scale.set(1.2, 1.4, 1.2);
+
+            // Wide, grimacing, slightly parted bandit mustache
+            opponent.stacheL.scale.set(1.35, 0.60, 0.9);
+            opponent.stacheR.scale.set(1.35, 0.60, 0.9);
+            opponent.stacheL.rotation.z = -0.18;
+            opponent.stacheR.rotation.z = 0.18;
+
+            // Off-white/dusty grey henley tunic & tan trail trousers
+            opponent.mats.torso.color.setHex(0xd2cbbe);
+            opponent.mats.accent.color.setHex(0x5c4a38);
+            opponent.mats.pants.color.setHex(0x4e4034);
+            opponent.mats.glove.color.setHex(0xd89464); // Bare hands
+        }
+        // --- 2. GROGGY (Luigi Pistilli: Unibrow, Cold Stare, Black Gambler Hat, Clean Chin) ---
+        else if (name.includes('GROGGY')) {
+            opponent.unibrowBridge.visible = true; // Heavy continuous unibrow
+            opponent.goatee.visible = false;       // Clean shaven jaw
+            opponent.mustache.visible = false;     // Stubble only
+
+            opponent.chest.scale.set(0.95, 1.25, 0.88); // Lean henchman
+            opponent.headSphere.scale.set(0.96, 1.12, 1.02);
+            opponent.nose.scale.set(0.80, 1.35, 1.35); // Sharp, prominent Roman nose
+
+            // Intense, cold, level stare with connecting brows
+            opponent.browL.rotation.set(-0.08, 0.15, Math.PI / 2 - 0.15);
+            opponent.browR.rotation.set(-0.08, -0.15, Math.PI / 2 + 0.15);
+
+            // Long mutton-chop sideburns
+            opponent.sideburnL.scale.set(1.2, 1.6, 1.2);
+            opponent.sideburnR.scale.set(1.2, 1.6, 1.2);
+
+            // Black flat-crowned gambler hat
+            opponent.hatCrown.scale.set(1.0, 0.68, 1.0);
+            opponent.hatBrim.scale.set(1.22, 0.9, 1.28);
+            opponent.mats.hat.color.setHex(0x121418);
+            opponent.mats.torso.color.setHex(0x282c34);
+            opponent.mats.accent.color.setHex(0x181a20);
+            opponent.mats.pants.color.setHex(0x1c1e24);
+            opponent.mats.hair.color.setHex(0x1c1612);
+        }
+        // --- 3. CAVENAUGH (Aldo Sambrell: Bushy Reddish-Blonde Curls, Golden Velvet Vest, Hatless) ---
+        else if (name.includes('CAVENAUGH')) {
+            opponent.hatGroup.visible = false;
+            opponent.hairLayer.visible = true;
             opponent.mustache.visible = false;
-        } else if (outlaw.isBlondie || name.includes('NO NAME')) {
-            opponent.cigarGroup.visible = true;
-            opponent.hatBrim.scale.set(1.15, 1.0, 1.15);
-            opponent.mats.hair.color.setHex(0x5a3c24);
-            opponent.mats.accent.color.setHex(0x486c42);
-            opponent.mats.pants.color.setHex(0x2c4874);
-        } else if (name.includes('BLACK')) {
-            opponent.mats.hat.color.setHex(0x111116);
-            opponent.mats.torso.color.setHex(0x161820);
-            opponent.mats.pants.color.setHex(0x111116);
-            opponent.mats.hair.color.setHex(0x0e0e12);
+
+            // Broad, stocky brawler frame
+            opponent.chest.scale.set(1.28, 1.15, 1.10);
+            opponent.headSphere.scale.set(1.12, 1.0, 1.08);
+            opponent.nose.scale.set(1.15, 1.05, 1.20);
+
+            // Bushy reddish-amber curls & matching brows
+            opponent.mats.hair.color.setHex(0xa8622c); // Rich ginger/auburn
+            opponent.browL.scale.set(1.3, 1.3, 1.3);
+            opponent.browR.scale.set(1.3, 1.3, 1.3);
+            opponent.sideburnL.scale.set(1.3, 1.4, 1.3);
+            opponent.sideburnR.scale.set(1.3, 1.4, 1.3);
+
+            // Mustard/gold crushed velvet vest & white shirt
+            opponent.mats.torso.color.setHex(0xc89832); // Mustard golden vest
+            opponent.mats.accent.color.setHex(0xe8e2d4); // White collar
+            opponent.mats.pants.color.setHex(0x3a3028);
+            opponent.mats.glove.color.setHex(0xe0986c);
+        }
+        // --- 4. EL INDIO (Gian Maria Volontè: Wild Hair, Ammo Bandolier, Cream Tunic) ---
+        else if (name.includes('INDIO')) {
+            opponent.hatGroup.visible = false;
+            opponent.hairLayer.visible = true;
+            opponent.bandolier.visible = true;
+
+            opponent.chest.scale.set(0.96, 1.25, 0.88);
+            opponent.headSphere.scale.set(0.98, 1.08, 1.02);
+            opponent.nose.scale.set(0.92, 1.18, 1.32);
+            opponent.nose.position.set(0, -0.01, 0.02);
+
+            opponent.mats.iris.color.setHex(0x6e522a);
+            opponent.browL.rotation.set(-0.25, 0.20, Math.PI / 2 - 0.38);
+            opponent.browR.rotation.set(-0.25, -0.20, Math.PI / 2 + 0.38);
+
+            opponent.mats.hair.color.setHex(0x363840);
             opponent.goatee.visible = true;
+            opponent.goatee.scale.set(1.30, 1.35, 1.10);
+            opponent.goatee.position.set(0, -0.08, 0.04);
+            opponent.jawBeardL.visible = true;
+            opponent.jawBeardR.visible = true;
+            opponent.stacheL.scale.set(1.25, 0.65, 0.9);
+            opponent.stacheR.scale.set(1.25, 0.65, 0.9);
+
+            opponent.mats.torso.color.setHex(0xdad4c4);
+            opponent.mats.accent.color.setHex(0x7a6a4c);
+            opponent.mats.pants.color.setHex(0x2a2824);
+            opponent.mats.glove.color.setHex(0xebb082);
+        }
+        // --- 5. THE MAN WITH NO NAME (Clint Eastwood) ---
+        else if (outlaw.isBlondie || name.includes('NO NAME') || name.includes('EASTWOOD')) {
+            opponent.cigarGroup.visible = true;
+            opponent.ponchoFlap.visible = true;
+
+            opponent.chest.scale.set(1.02, 1.20, 0.92);
+            opponent.headSphere.scale.set(0.98, 1.05, 1.04);
+            opponent.nose.scale.set(0.90, 1.15, 1.30);
+            opponent.nose.position.set(0, -0.01, 0.03);
+
+            opponent.browL.rotation.set(-0.25, 0.25, Math.PI / 2 - 0.42);
+            opponent.browR.rotation.set(-0.25, -0.25, Math.PI / 2 + 0.42);
+
+            opponent.goatee.visible = true;
+            opponent.goatee.scale.set(1.1, 0.9, 0.9);
+            opponent.goatee.position.set(0, -0.07, 0.02);
+            opponent.stacheL.scale.set(1.1, 0.35, 0.6);
+            opponent.stacheR.scale.set(1.1, 0.35, 0.6);
+
+            opponent.hatCrown.scale.set(1.08, 0.70, 1.08);
+            opponent.hatBrim.scale.set(1.22, 0.95, 1.28);
+            opponent.hatGroup.rotation.set(-0.06, 0, -0.08);
+
+            opponent.mats.hat.color.setHex(0x48301c);
+            opponent.mats.accent.color.setHex(0x385634);
+            opponent.mats.torso.color.setHex(0x385634);
+            opponent.mats.pants.color.setHex(0x284268);
+            opponent.mats.hair.color.setHex(0x563820);
+            opponent.mats.glove.color.setHex(0xb89874);
         }
     }
 

@@ -454,33 +454,33 @@ export function createAudioSystem() {
 
         // Revolver Cylinder Spin
         playCylinderSpin() {
-            if (muted) return;
-            const ctx = ensureContext();
-            if (!ctx) return;
-            const now = ctx.currentTime;
+            // if (muted) return;
+            // const ctx = ensureContext();
+            // if (!ctx) return;
+            // const now = ctx.currentTime;
 
-            const clickCount = 10;
-            let currentDelay = 0;
+            // const clickCount = 10;
+            // let currentDelay = 0;
 
-            for (let i = 0; i < clickCount; i++) {
-                currentDelay += 0.022 + Math.pow(i / clickCount, 2) * 0.045;
-                const clickTime = now + currentDelay;
+            // for (let i = 0; i < clickCount; i++) {
+            //     currentDelay += 0.022 + Math.pow(i / clickCount, 2) * 0.045;
+            //     const clickTime = now + currentDelay;
 
-                const osc = ctx.createOscillator();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(2800 + Math.random() * 300, clickTime);
-                osc.frequency.exponentialRampToValueAtTime(1100, clickTime + 0.012);
+            //     const osc = ctx.createOscillator();
+            //     osc.type = 'triangle';
+            //     osc.frequency.setValueAtTime(2800 + Math.random() * 300, clickTime);
+            //     osc.frequency.exponentialRampToValueAtTime(1100, clickTime + 0.012);
 
-                const gain = ctx.createGain();
-                const vol = (1 - (i / clickCount) * 0.4) * 0.18;
-                gain.gain.setValueAtTime(vol, clickTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, clickTime + 0.014);
+            //     const gain = ctx.createGain();
+            //     const vol = (1 - (i / clickCount) * 0.4) * 0.18;
+            //     gain.gain.setValueAtTime(vol, clickTime);
+            //     gain.gain.exponentialRampToValueAtTime(0.001, clickTime + 0.014);
 
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start(clickTime);
-                osc.stop(clickTime + 0.016);
-            }
+            //     osc.connect(gain);
+            //     gain.connect(ctx.destination);
+            //     osc.start(clickTime);
+            //     osc.stop(clickTime + 0.016);
+            //}
         },
     };
 }
