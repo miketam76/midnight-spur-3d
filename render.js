@@ -773,16 +773,52 @@ export function createRenderer(canvas) {
 
         // --- ACCURATE LEE VAN CLEEF (COLONEL MORTIMER) PRESET ---
         if (isHero) {
-            // Lean, severe military gunslinger silhouette
+            // Lean, tall military gunslinger silhouette
             root.chest.scale.set(0.90, 1.28, 0.82);
             root.headSphere.scale.set(0.94, 1.06, 1.0);
 
-            // Classic Mario-style sphere nose, scaled down to a compact, neat profile
+            // Remove the white chest bandage! Overlay becomes black frock coat body
+            root.overlay.visible = false;
+
+            // Frock coat lapels & narrow triangular shirt-front V
+            const suitGroup = new THREE.Group();
+            suitGroup.position.set(0, 0.50, 0.12);
+
+            // Narrow white shirt strip (peeking out from under coat)
+            const whiteShirtV = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, 0.26, 0.03),
+                new THREE.MeshLambertMaterial({ color: 0xf0ece1, flatShading: true })
+            );
+            whiteShirtV.position.set(0, 0.05, 0.13);
+
+            // Black coat lapel left & right
+            const lapelL = new THREE.Mesh(
+                new THREE.BoxGeometry(0.09, 0.28, 0.04),
+                root.mats.torso
+            );
+            lapelL.position.set(-0.08, 0.04, 0.14);
+            lapelL.rotation.z = -0.15;
+
+            const lapelR = new THREE.Mesh(
+                new THREE.BoxGeometry(0.09, 0.28, 0.04),
+                root.mats.torso
+            );
+            lapelR.position.set(0.08, 0.04, 0.14);
+            lapelR.rotation.z = 0.15;
+
+            suitGroup.add(whiteShirtV, lapelL, lapelR);
+            root.torsoGroup.add(suitGroup);
+
+            // Re-anchor the black string bolo tie right at the collar
+            root.heroTie.position.set(0, 0, 0.02);
+            root.heroTie.visible = true;
+
+            // Compact rounded nose
             root.noseGroup.position.set(0, 0.14, 0.25);
-            root.nose.scale.set(0.68, 0.62, 0.72); // ~35% smaller than the default
+            root.nose.scale.set(0.68, 0.62, 0.72);
             root.nose.position.set(0, 0, 0);
 
-            // Neat salt-and-pepper pencil mustache tucked right under the nose
+            // Trimmed grey/black pencil mustache
             root.mustache.position.set(0, 0.07, 0.24);
             root.stacheL.scale.set(1.05, 0.25, 0.45);
             root.stacheR.scale.set(1.05, 0.25, 0.45);
@@ -802,20 +838,20 @@ export function createRenderer(canvas) {
             root.browL.rotation.set(-0.25, 0.22, Math.PI / 2 - 0.48);
             root.browR.rotation.set(-0.25, -0.22, Math.PI / 2 + 0.48);
 
-            // Low-crowned planter Stetson with wide circular flat brim
+            // Low-crowned planter Stetson
             root.hatBrim.scale.set(1.28, 0.85, 1.35);
             root.hatCrown.scale.set(0.98, 0.55, 1.0);
             root.hatCrown.position.set(0, 0.06, -0.01);
             root.hatBand.scale.set(1.01, 0.55, 1.01);
             root.hatBand.position.set(0, 0.015, -0.01);
 
-            // Dark Mortimer palette
+            // All-Black Wool Suit Palette
             root.mats.hat.color.setHex(0x101216);
-            root.mats.torso.color.setHex(0x181c24);
-            root.mats.accent.color.setHex(0xe8e4dc);
-            root.mats.pants.color.setHex(0x121418);
-            root.mats.glove.color.setHex(0x1c1814);
-            root.mats.hair.color.setHex(0x565860); // Salt & pepper gray
+            root.mats.torso.color.setHex(0x14161c); // Deep black suit jacket
+            root.mats.accent.color.setHex(0x14161c);
+            root.mats.pants.color.setHex(0x121418); // Matching black trousers
+            root.mats.glove.color.setHex(0x1a1612); // Dark leather gloves
+            root.mats.hair.color.setHex(0x565860);  // Salt & pepper gray
         }
 
         return root;
