@@ -1,4 +1,4 @@
-// game.js - Midnight Spur (Attract Mode, 3D Engine, Full Pause & Cumulative Bounty Ranking)
+// game.js - Midnight Spur: Street Walk Transition & Duel Engine
 import { createAudioSystem } from './audio.js';
 import { createRenderer } from './render.js';
 
@@ -10,6 +10,7 @@ const phases = {
     countdown: 'countdown',
     duel: 'duel',
     roundWin: 'roundWin',
+    street_walk: 'street_walk',
     gameOver: 'gameOver',
 };
 
@@ -91,13 +92,8 @@ export function createGame(dom) {
         currentOutlaw: outlawRoster[0],
         playerDeathProgress: 0,
         opponentDeathProgress: 0,
-        dustParticles: Array.from({ length: 18 }, () => ({
-            x: Math.random() * 800,
-            y: 200 + Math.random() * 200,
-            size: Math.random() > 0.6 ? 2 : 1,
-            speed: 1.5 + Math.random() * 2.5,
-            alpha: 0.2 + Math.random() * 0.4
-        })),
+        walkTimer: 0,
+        lastFrameTime: 0,
         screenShake: 0,
         baseStatus: 'Choose Start Game to face the outlaw.',
         pendingTransition: null,
@@ -130,41 +126,6 @@ export function createGame(dom) {
 
     function isActivePhase() {
         return state.phase === phases.countdown || state.phase === phases.duel || state.phase === phases.roundWin;
-    }
-
-    function updateTumbleweed() {
-        const tw = state.tumbleweed;
-        if (!tw) return;
-
-        const isLateGame = state.round > 12;
-        const isMidGame = state.round > 5;
-
-        if (!tw.active) {
-            tw.timer--;
-            if (tw.timer <= 0) {
-                tw.active = true;
-                tw.x = -40;
-                tw.y = Math.floor(canvas.height * 0.76) + Math.random() * 12;
-
-                const baseSpeed = 1.6 + Math.random() * 1.0;
-                tw.vx = baseSpeed * (isLateGame ? 1.5 : (isMidGame ? 1.25 : 1.0));
-
-                tw.rotation = 0;
-                tw.bouncePhase = 0;
-            }
-        } else {
-            tw.x += tw.vx;
-            tw.rotation += 0.07 * (tw.vx / 1.6);
-            tw.bouncePhase += 0.055;
-            tw.currentY = tw.y - Math.abs(Math.sin(tw.bouncePhase) * 11);
-
-            if (tw.x > canvas.width + 50) {
-                tw.active = false;
-                const minDelay = isLateGame ? 60 : (isMidGame ? 110 : 180);
-                const variance = isLateGame ? 80 : 160;
-                tw.timer = minDelay + Math.floor(Math.random() * variance);
-            }
-        }
     }
 
     function clearAttractTimer() {
@@ -220,7 +181,7 @@ export function createGame(dom) {
 
     function showScreen(screenName) {
         dom.menuScreen.hidden = screenName !== phases.menu;
-        dom.gameScreen.hidden = screenName !== phases.wanted && screenName !== phases.countdown && screenName !== phases.duel && screenName !== phases.roundWin;
+        dom.gameScreen.hidden = screenName !== phases.street_walk && screenName !== phases.wanted && screenName !== phases.countdown && screenName !== phases.duel && screenName !== phases.roundWin;
         dom.resultScreen.hidden = screenName !== phases.gameOver;
         if (dom.scoresScreen) dom.scoresScreen.hidden = screenName !== phases.scores;
         if (dom.entryScreen) dom.entryScreen.hidden = screenName !== phases.entry;
@@ -306,6 +267,8 @@ export function createGame(dom) {
         state.opponentOutfit = state.currentOutlaw.outfit;
         state.phase = phases.wanted;
         state.isPaused = false;
+        state.playerHasDrawn = false;
+        state.opponentHasDrawn = false;
         resetDeathStates();
         showScreen(phases.wanted);
         syncHud();
@@ -320,6 +283,8 @@ export function createGame(dom) {
         state.currentOutlaw = getOutlawForRound(state.round);
         state.opponentOutfit = state.currentOutlaw.outfit;
         state.phase = phases.wanted;
+        state.playerHasDrawn = false;
+        state.opponentHasDrawn = false;
         resetDeathStates();
         showScreen(phases.wanted);
         setStatus(`DEMO: ${state.currentOutlaw.name}`);
@@ -403,7 +368,19 @@ export function createGame(dom) {
         state.bestWins = Math.max(state.bestWins, state.wins);
         syncHud();
         audio.playVictory();
-        scheduleTransition('startRound', 1000);
+
+        // Immediately load next target so he is waiting down the street
+        state.currentOutlaw = getOutlawForRound(state.round);
+        state.opponentOutfit = state.currentOutlaw.outfit;
+        state.playerHasDrawn = false;
+        state.opponentHasDrawn = false;
+        resetDeathStates();
+
+        // Trigger Street Walk
+        state.phase = phases.street_walk;
+        state.walkTimer = 0;
+        showScreen(phases.street_walk);
+        setStatus(`Round ${state.round}: Mortimer marches down the street...`);
     }
 
     function qualifiesForHighScores() {
@@ -482,6 +459,9 @@ export function createGame(dom) {
         state.round = 1;
         state.wins = 0;
         state.totalBountyEarned = 0;
+        state.walkTimer = 0;
+        state.playerHasDrawn = false;
+        state.opponentHasDrawn = false;
         resetDeathStates();
         showScreen(phases.menu);
         syncHud();
@@ -512,6 +492,11 @@ export function createGame(dom) {
             startRound();
             return;
         }
+        // Skip walk transition if player presses DRAW
+        if (state.phase === phases.street_walk) {
+            startRound();
+            return;
+        }
         if (state.phase === phases.countdown && performance.now() < state.drawTime) {
             resolveEarlyDraw();
             return;
@@ -523,9 +508,27 @@ export function createGame(dom) {
     }
 
     function tick(now) {
+        if (!state.lastFrameTime) state.lastFrameTime = now;
+        const delta = Math.min((now - state.lastFrameTime) / 1000, 0.1);
+        state.lastFrameTime = now;
+
         if (state.isPaused) {
             state.flash = Math.max(0, state.flash - 0.02);
             state.screenShake = Math.max(0, state.screenShake - 0.04);
+            renderer.render(state);
+            state.animationFrame = window.requestAnimationFrame(tick);
+            return;
+        }
+
+        // --- STREET WALK PROGRESSION ---
+        if (state.phase === phases.street_walk) {
+            state.walkTimer += delta;
+
+            if (state.walkTimer >= 2.4) {
+                state.walkTimer = 0;
+                startRound();
+            }
+
             renderer.render(state);
             state.animationFrame = window.requestAnimationFrame(tick);
             return;
@@ -541,8 +544,6 @@ export function createGame(dom) {
         if (state.opponentDeathProgress > 0 && state.opponentDeathProgress < 1) {
             state.opponentDeathProgress = clamp(state.opponentDeathProgress + 0.035, 0, 1);
         }
-
-        updateTumbleweed();
 
         if (state.pendingTransition && now >= state.pendingTransitionAt) {
             runPendingTransition();

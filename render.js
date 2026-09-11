@@ -1,4 +1,4 @@
-// render.js - Midnight Spur: Authentic Leone Roster (Tuco, Groggy, Cavenaugh, Indio, Eastwood, Van Cleef)
+// render.js - Midnight Spur: Authentic Leone Roster & Street Walk Transition
 import * as THREE from 'three';
 
 export function createRenderer(canvas) {
@@ -353,15 +353,15 @@ export function createRenderer(canvas) {
             skin: toonMat(isHero ? 0xebaf84 : 0xebb082),
             nose: toonMat(isHero ? 0xde9b70 : 0xdb9468),
             hat: toonMat(isHero ? 0x111318 : 0x543622),
-            torso: toonMat(isHero ? 0x1c2028 : 0xa46034),
-            accent: toonMat(isHero ? 0xeae6dc : 0xe8cf8c),
-            pants: toonMat(isHero ? 0x14161c : 0x2c4468),
+            torso: toonMat(isHero ? 0x14161c : 0xa46034),
+            accent: toonMat(isHero ? 0x14161c : 0xe8cf8c),
+            pants: toonMat(isHero ? 0x121418 : 0x2c4468),
             boots: toonMat(0x16120e),
-            glove: toonMat(isHero ? 0x1c1612 : 0xecd8be),
+            glove: toonMat(isHero ? 0x1a1612 : 0xecd8be),
             gold: toonMat(0xf4c038),
             silver: toonMat(0xb8c0cc),
             rope: toonMat(0xbca67c),
-            hair: toonMat(isHero ? 0x4a4c52 : 0x482a16),
+            hair: toonMat(isHero ? 0x565860 : 0x482a16),
             eyeWhite: toonMat(0xffffff),
             iris: toonMat(isHero ? 0x382c22 : 0x4e2c14),
             pupil: toonMat(0x0a0c10),
@@ -373,6 +373,7 @@ export function createRenderer(canvas) {
             brassTrigger: toonMat(0xc49a45),
             walnutGrip: toonMat(0x381e0e),
             leatherDark: toonMat(0x281c14),
+            stubble: toonMat(0x946e54),
         };
 
         // --- LOWER BODY ---
@@ -410,8 +411,8 @@ export function createRenderer(canvas) {
         const legL = createToonLeg(-0.16);
         const legR = createToonLeg(0.16);
         root.add(legL, legR);
-        root.legL = legL;
-        root.legR = legR;
+        root.legL = legL; // Exposed for walking animation
+        root.legR = legR; // Exposed for walking animation
 
         // --- TORSO ---
         const torsoGroup = new THREE.Group();
@@ -455,6 +456,59 @@ export function createRenderer(canvas) {
         torsoGroup.add(heroTie);
         root.heroTie = heroTie;
 
+        // Hero: Tailored Black Wool Suit Jacket, Lapels & Coat Tails
+        if (isHero) {
+            root.overlay.visible = false;
+            const suitGroup = new THREE.Group();
+            suitGroup.position.set(0, 0.50, 0.12);
+
+            const whiteShirtV = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, 0.26, 0.03),
+                new THREE.MeshLambertMaterial({ color: 0xf0ece1, flatShading: true })
+            );
+            whiteShirtV.position.set(0, 0.05, 0.13);
+
+            const lapelL = new THREE.Mesh(
+                new THREE.BoxGeometry(0.09, 0.28, 0.04),
+                root.mats.torso
+            );
+            lapelL.position.set(-0.08, 0.04, 0.14);
+            lapelL.rotation.z = -0.15;
+
+            const lapelR = new THREE.Mesh(
+                new THREE.BoxGeometry(0.09, 0.28, 0.04),
+                root.mats.torso
+            );
+            lapelR.position.set(0.08, 0.04, 0.14);
+            lapelR.rotation.z = 0.15;
+
+            suitGroup.add(whiteShirtV, lapelL, lapelR);
+            torsoGroup.add(suitGroup);
+
+            // Mortimer Frock Coat Skirts
+            const coatTailL = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.26, 0.04), root.mats.torso);
+            coatTailL.position.set(-0.13, -0.06, 0.02);
+            coatTailL.rotation.z = 0.05;
+
+            const coatTailR = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.26, 0.04), root.mats.torso);
+            coatTailR.position.set(0.13, -0.06, 0.02);
+            coatTailR.rotation.z = -0.05;
+
+            const coatBack = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.28, 0.04), root.mats.torso);
+            coatBack.position.set(0, -0.07, -0.16);
+
+            torsoGroup.add(coatTailL, coatTailR, coatBack);
+
+            // Mortimer Silver Pocket Watch Chain
+            const watchChain = new THREE.Mesh(
+                new THREE.TorusGeometry(0.055, 0.007, 8, 16, Math.PI),
+                root.mats.silver
+            );
+            watchChain.position.set(0.08, 0.16, 0.27);
+            watchChain.rotation.z = Math.PI / 2;
+            torsoGroup.add(watchChain);
+        }
+
         // Tuco: Hangman's Noose Around Neck
         const nooseGroup = new THREE.Group();
         const nooseRope = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.024, 16, 32), root.mats.rope);
@@ -470,6 +524,17 @@ export function createRenderer(canvas) {
         torsoGroup.add(nooseGroup);
         root.nooseGroup = nooseGroup;
 
+        // Tuco: Leather Trail Suspenders
+        const tucoSuspenders = new THREE.Group();
+        const suspL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.32, 0.02), root.mats.leatherDark);
+        suspL.position.set(-0.14, 0.36, 0.27);
+        const suspR = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.32, 0.02), root.mats.leatherDark);
+        suspR.position.set(0.14, 0.36, 0.27);
+        tucoSuspenders.add(suspL, suspR);
+        tucoSuspenders.visible = false;
+        torsoGroup.add(tucoSuspenders);
+        root.tucoSuspenders = tucoSuspenders;
+
         // Eastwood Poncho Shoulder Drape
         const ponchoFlap = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.36, 0.18), root.mats.accent);
         ponchoFlap.position.set(-0.18, 0.52, 0.02);
@@ -477,6 +542,18 @@ export function createRenderer(canvas) {
         ponchoFlap.visible = false;
         torsoGroup.add(ponchoFlap);
         root.ponchoFlap = ponchoFlap;
+
+        // Eastwood Poncho Geometric Stitch Bands
+        const ponchoStitches = new THREE.Group();
+        const stitchMat = toonMat(0xf0eedc);
+        const stitch1 = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.022, 0.02), stitchMat);
+        stitch1.position.set(0, 0.50, 0.28);
+        const stitch2 = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.022, 0.02), stitchMat);
+        stitch2.position.set(0, 0.42, 0.29);
+        ponchoStitches.add(stitch1, stitch2);
+        ponchoStitches.visible = false;
+        torsoGroup.add(ponchoStitches);
+        root.ponchoStitches = ponchoStitches;
 
         // El Indio Diagonal Ammo Bandolier
         const bandolier = new THREE.Group();
@@ -524,7 +601,7 @@ export function createRenderer(canvas) {
         root.noseGroup = noseGroup;
         root.nose = nose;
 
-        // Facial Hair & Jaw-Beard System
+        // Facial Hair & Stubble System
         const mustacheGroup = new THREE.Group();
         mustacheGroup.position.set(0, 0.07, 0.24);
 
@@ -550,7 +627,13 @@ export function createRenderer(canvas) {
         jawBeardR.position.set(0.16, -0.04, -0.08);
         jawBeardR.rotation.z = -0.55;
 
-        mustacheGroup.add(stacheL, stacheR, goatee, jawBeardL, jawBeardR);
+        // Groggy Heavy Stubble Shadow
+        const stubbleJaw = new THREE.Mesh(new THREE.SphereGeometry(0.18, 24, 16), root.mats.stubble);
+        stubbleJaw.position.set(0, -0.08, 0.06);
+        stubbleJaw.scale.set(1.1, 0.8, 0.8);
+        stubbleJaw.visible = false;
+
+        mustacheGroup.add(stacheL, stacheR, goatee, jawBeardL, jawBeardR, stubbleJaw);
         headGroup.add(mustacheGroup);
         root.mustache = mustacheGroup;
         root.stacheL = stacheL;
@@ -558,6 +641,7 @@ export function createRenderer(canvas) {
         root.goatee = goatee;
         root.jawBeardL = jawBeardL;
         root.jawBeardR = jawBeardR;
+        root.stubbleJaw = stubbleJaw;
 
         // Eyes
         function createToonEye(x) {
@@ -599,7 +683,6 @@ export function createRenderer(canvas) {
         browR.position.set(0.095, 0.29, 0.20);
         browR.rotation.set(-0.15, -0.22, Math.PI / 2 + 0.25);
 
-        // Groggy's Heavy Unibrow Bridge Bar
         const unibrowBridge = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.08, 16), root.mats.hair);
         unibrowBridge.position.set(0, 0.28, 0.23);
         unibrowBridge.rotation.z = Math.PI / 2;
@@ -652,7 +735,7 @@ export function createRenderer(canvas) {
         root.hatCrown = crown;
         root.hatBand = band;
 
-        // Curly/Wild Hair Layer (Indio / Tuco / Cavenaugh)
+        // Curly/Wild Hair Layer
         const hairLayer = new THREE.Group();
         hairLayer.position.set(0, 0.14, -0.02);
 
@@ -714,6 +797,7 @@ export function createRenderer(canvas) {
         gloveL.scale.set(1.1, 1.2, 0.9);
         armLeftGroup.add(gloveL);
         root.add(armLeftGroup);
+        root.armLeftGroup = armLeftGroup; // Exposed for walking & idle
 
         const armRightGroup = new THREE.Group();
         armRightGroup.position.set(0.35, 1.25, 0);
@@ -773,52 +857,13 @@ export function createRenderer(canvas) {
 
         // --- ACCURATE LEE VAN CLEEF (COLONEL MORTIMER) PRESET ---
         if (isHero) {
-            // Lean, tall military gunslinger silhouette
             root.chest.scale.set(0.90, 1.28, 0.82);
             root.headSphere.scale.set(0.94, 1.06, 1.0);
 
-            // Remove the white chest bandage! Overlay becomes black frock coat body
-            root.overlay.visible = false;
-
-            // Frock coat lapels & narrow triangular shirt-front V
-            const suitGroup = new THREE.Group();
-            suitGroup.position.set(0, 0.50, 0.12);
-
-            // Narrow white shirt strip (peeking out from under coat)
-            const whiteShirtV = new THREE.Mesh(
-                new THREE.BoxGeometry(0.08, 0.26, 0.03),
-                new THREE.MeshLambertMaterial({ color: 0xf0ece1, flatShading: true })
-            );
-            whiteShirtV.position.set(0, 0.05, 0.13);
-
-            // Black coat lapel left & right
-            const lapelL = new THREE.Mesh(
-                new THREE.BoxGeometry(0.09, 0.28, 0.04),
-                root.mats.torso
-            );
-            lapelL.position.set(-0.08, 0.04, 0.14);
-            lapelL.rotation.z = -0.15;
-
-            const lapelR = new THREE.Mesh(
-                new THREE.BoxGeometry(0.09, 0.28, 0.04),
-                root.mats.torso
-            );
-            lapelR.position.set(0.08, 0.04, 0.14);
-            lapelR.rotation.z = 0.15;
-
-            suitGroup.add(whiteShirtV, lapelL, lapelR);
-            root.torsoGroup.add(suitGroup);
-
-            // Re-anchor the black string bolo tie right at the collar
-            root.heroTie.position.set(0, 0, 0.02);
-            root.heroTie.visible = true;
-
-            // Compact rounded nose
             root.noseGroup.position.set(0, 0.14, 0.25);
             root.nose.scale.set(0.68, 0.62, 0.72);
             root.nose.position.set(0, 0, 0);
 
-            // Trimmed grey/black pencil mustache
             root.mustache.position.set(0, 0.07, 0.24);
             root.stacheL.scale.set(1.05, 0.25, 0.45);
             root.stacheR.scale.set(1.05, 0.25, 0.45);
@@ -830,7 +875,6 @@ export function createRenderer(canvas) {
             root.jawBeardL.visible = false;
             root.jawBeardR.visible = false;
 
-            // Piercing razor squint
             root.eyeL.scale.set(0.95, 0.45, 0.9);
             root.eyeR.scale.set(0.95, 0.45, 0.9);
             root.eyeL.position.set(-0.085, 0.21, 0.23);
@@ -838,20 +882,18 @@ export function createRenderer(canvas) {
             root.browL.rotation.set(-0.25, 0.22, Math.PI / 2 - 0.48);
             root.browR.rotation.set(-0.25, -0.22, Math.PI / 2 + 0.48);
 
-            // Low-crowned planter Stetson
             root.hatBrim.scale.set(1.28, 0.85, 1.35);
             root.hatCrown.scale.set(0.98, 0.55, 1.0);
             root.hatCrown.position.set(0, 0.06, -0.01);
             root.hatBand.scale.set(1.01, 0.55, 1.01);
             root.hatBand.position.set(0, 0.015, -0.01);
 
-            // All-Black Wool Suit Palette
             root.mats.hat.color.setHex(0x101216);
-            root.mats.torso.color.setHex(0x14161c); // Deep black suit jacket
+            root.mats.torso.color.setHex(0x14161c);
             root.mats.accent.color.setHex(0x14161c);
-            root.mats.pants.color.setHex(0x121418); // Matching black trousers
-            root.mats.glove.color.setHex(0x1a1612); // Dark leather gloves
-            root.mats.hair.color.setHex(0x565860);  // Salt & pepper gray
+            root.mats.pants.color.setHex(0x121418);
+            root.mats.glove.color.setHex(0x1a1612);
+            root.mats.hair.color.setHex(0x565860);
         }
 
         return root;
@@ -941,14 +983,17 @@ export function createRenderer(canvas) {
         opponent.hairLayer.visible = false;
         opponent.cigarGroup.visible = false;
         opponent.ponchoFlap.visible = false;
+        opponent.ponchoStitches.visible = false;
         opponent.bandolier.visible = false;
         opponent.nooseGroup.visible = false;
+        opponent.tucoSuspenders.visible = false;
         opponent.mustache.visible = true;
         opponent.stacheL.visible = true;
         opponent.stacheR.visible = true;
         opponent.goatee.visible = false;
         opponent.jawBeardL.visible = false;
         opponent.jawBeardR.visible = false;
+        opponent.stubbleJaw.visible = false;
         opponent.unibrowBridge.visible = false;
 
         opponent.chest.scale.set(1.05, 1.15, 0.88);
@@ -976,54 +1021,50 @@ export function createRenderer(canvas) {
         opponent.mats.glove.color.setHex(0xecd8be);
         opponent.mats.iris.color.setHex(0x4e2c14);
 
-        // --- 1. TUCO (Eli Wallach: Hatless, Hangman's Noose, Sweeping Black Hair, Gritty Henley) ---
+        // --- 1. TUCO ---
         if (name.includes('TUCO')) {
             opponent.hatGroup.visible = false;
             opponent.hairLayer.visible = true;
-            opponent.nooseGroup.visible = true; // Hangman's noose looped around neck
+            opponent.nooseGroup.visible = true;
+            opponent.tucoSuspenders.visible = true;
 
-            opponent.chest.scale.set(1.30, 1.15, 1.15); // Stocky, muscular barrel
+            opponent.chest.scale.set(1.30, 1.15, 1.15);
             opponent.headSphere.scale.set(1.10, 1.02, 1.10);
-            opponent.nose.scale.set(1.25, 0.95, 1.30); // Broad, crooked boxer nose
+            opponent.nose.scale.set(1.25, 0.95, 1.30);
             opponent.legL.legMesh.scale.set(1.15, 0.90, 1.15);
             opponent.legR.legMesh.scale.set(1.15, 0.90, 1.15);
 
-            // Swept-up black messy curls
             opponent.mats.hair.color.setHex(0x221814);
             opponent.sideburnL.scale.set(1.2, 1.4, 1.2);
             opponent.sideburnR.scale.set(1.2, 1.4, 1.2);
 
-            // Wide, grimacing, slightly parted bandit mustache
             opponent.stacheL.scale.set(1.35, 0.60, 0.9);
             opponent.stacheR.scale.set(1.35, 0.60, 0.9);
             opponent.stacheL.rotation.z = -0.18;
             opponent.stacheR.rotation.z = 0.18;
 
-            // Off-white/dusty grey henley tunic & tan trail trousers
             opponent.mats.torso.color.setHex(0xd2cbbe);
             opponent.mats.accent.color.setHex(0x5c4a38);
             opponent.mats.pants.color.setHex(0x4e4034);
-            opponent.mats.glove.color.setHex(0xd89464); // Bare hands
+            opponent.mats.glove.color.setHex(0xd89464);
         }
-        // --- 2. GROGGY (Luigi Pistilli: Unibrow, Cold Stare, Black Gambler Hat, Clean Chin) ---
+        // --- 2. GROGGY ---
         else if (name.includes('GROGGY')) {
-            opponent.unibrowBridge.visible = true; // Heavy continuous unibrow
-            opponent.goatee.visible = false;       // Clean shaven jaw
-            opponent.mustache.visible = false;     // Stubble only
+            opponent.unibrowBridge.visible = true;
+            opponent.stubbleJaw.visible = true;
+            opponent.goatee.visible = false;
+            opponent.mustache.visible = false;
 
-            opponent.chest.scale.set(0.95, 1.25, 0.88); // Lean henchman
+            opponent.chest.scale.set(0.95, 1.25, 0.88);
             opponent.headSphere.scale.set(0.96, 1.12, 1.02);
-            opponent.nose.scale.set(0.80, 1.35, 1.35); // Sharp, prominent Roman nose
+            opponent.nose.scale.set(0.80, 1.35, 1.35);
 
-            // Intense, cold, level stare with connecting brows
             opponent.browL.rotation.set(-0.08, 0.15, Math.PI / 2 - 0.15);
             opponent.browR.rotation.set(-0.08, -0.15, Math.PI / 2 + 0.15);
 
-            // Long mutton-chop sideburns
             opponent.sideburnL.scale.set(1.2, 1.6, 1.2);
             opponent.sideburnR.scale.set(1.2, 1.6, 1.2);
 
-            // Black flat-crowned gambler hat
             opponent.hatCrown.scale.set(1.0, 0.68, 1.0);
             opponent.hatBrim.scale.set(1.22, 0.9, 1.28);
             opponent.mats.hat.color.setHex(0x121418);
@@ -1032,31 +1073,28 @@ export function createRenderer(canvas) {
             opponent.mats.pants.color.setHex(0x1c1e24);
             opponent.mats.hair.color.setHex(0x1c1612);
         }
-        // --- 3. CAVENAUGH (Aldo Sambrell: Bushy Reddish-Blonde Curls, Golden Velvet Vest, Hatless) ---
+        // --- 3. CAVENAUGH ---
         else if (name.includes('CAVENAUGH')) {
             opponent.hatGroup.visible = false;
             opponent.hairLayer.visible = true;
             opponent.mustache.visible = false;
 
-            // Broad, stocky brawler frame
             opponent.chest.scale.set(1.28, 1.15, 1.10);
             opponent.headSphere.scale.set(1.12, 1.0, 1.08);
             opponent.nose.scale.set(1.15, 1.05, 1.20);
 
-            // Bushy reddish-amber curls & matching brows
-            opponent.mats.hair.color.setHex(0xa8622c); // Rich ginger/auburn
+            opponent.mats.hair.color.setHex(0xa8622c);
             opponent.browL.scale.set(1.3, 1.3, 1.3);
             opponent.browR.scale.set(1.3, 1.3, 1.3);
             opponent.sideburnL.scale.set(1.3, 1.4, 1.3);
             opponent.sideburnR.scale.set(1.3, 1.4, 1.3);
 
-            // Mustard/gold crushed velvet vest & white shirt
-            opponent.mats.torso.color.setHex(0xc89832); // Mustard golden vest
-            opponent.mats.accent.color.setHex(0xe8e2d4); // White collar
+            opponent.mats.torso.color.setHex(0xc89832);
+            opponent.mats.accent.color.setHex(0xe8e2d4);
             opponent.mats.pants.color.setHex(0x3a3028);
             opponent.mats.glove.color.setHex(0xe0986c);
         }
-        // --- 4. EL INDIO (Gian Maria Volontè: Wild Hair, Ammo Bandolier, Cream Tunic) ---
+        // --- 4. EL INDIO ---
         else if (name.includes('INDIO')) {
             opponent.hatGroup.visible = false;
             opponent.hairLayer.visible = true;
@@ -1081,14 +1119,15 @@ export function createRenderer(canvas) {
             opponent.stacheR.scale.set(1.25, 0.65, 0.9);
 
             opponent.mats.torso.color.setHex(0xdad4c4);
-            opponent.mats.accent.color.setHex(0x7a6a4c);
+            opponent.mats.accent.color.setHex(709080);
             opponent.mats.pants.color.setHex(0x2a2824);
             opponent.mats.glove.color.setHex(0xebb082);
         }
-        // --- 5. THE MAN WITH NO NAME (Clint Eastwood) ---
+        // --- 5. THE MAN WITH NO NAME ---
         else if (outlaw.isBlondie || name.includes('NO NAME') || name.includes('EASTWOOD')) {
             opponent.cigarGroup.visible = true;
             opponent.ponchoFlap.visible = true;
+            opponent.ponchoStitches.visible = true;
 
             opponent.chest.scale.set(1.02, 1.20, 0.92);
             opponent.headSphere.scale.set(0.98, 1.05, 1.04);
@@ -1142,6 +1181,52 @@ export function createRenderer(canvas) {
             const currentAspect = canvas.width / canvas.height;
             const baseCamZ = currentAspect < 1.0 ? 9.2 : (currentAspect < 1.4 ? 8.2 : 7.2);
 
+            // ==========================================
+            // STREET WALK TO NEXT OPPONENT
+            // ==========================================
+            if (state.phase === 'street_walk') {
+                wantedGroup.visible = false;
+                const progress = Math.min((state.walkTimer || 0) / 2.4, 1.0);
+
+                // Mortimer holsters weapon, turns along street, marches right
+                player.gun.visible = false;
+                opponent.gun.visible = false;
+                player.rotation.set(0, Math.PI / 2, 0);
+                player.armRightGroup.rotation.set(0.18, 0, -0.06);
+                player.armLeftGroup.rotation.set(0.18, 0, 0.06);
+
+                const walkX = THREE.MathUtils.lerp(-2.8, 0.4, progress);
+                player.position.set(walkX, 0, 0);
+
+                // Alternating leg swing & subtle torso bob
+                const stride = Math.sin(progress * 22);
+                if (player.legL && player.legR) {
+                    player.legL.rotation.x = stride * 0.45;
+                    player.legR.rotation.x = -stride * 0.45;
+                }
+                player.torsoGroup.position.y = 0.58 + Math.abs(Math.sin(progress * 22)) * 0.04;
+
+                // The NEXT outlaw stands on the right waiting for the duel
+                opponent.position.set(2.8 + (1.0 - progress) * 2.0, 0, 0);
+                opponent.rotation.set(0, -Math.PI / 2.3, 0);
+                opponent.armRightGroup.rotation.set(0.18, 0, -0.06);
+                if (opponent.legL && opponent.legR) {
+                    opponent.legL.rotation.set(0, 0, 0);
+                    opponent.legR.rotation.set(0, 0, 0);
+                }
+
+                // Dolly camera tracks alongside Mortimer
+                camera.position.set(walkX * 0.4, 1.45, baseCamZ - 0.4);
+                camera.lookAt(walkX * 0.4, 1.0, 0);
+
+                renderer.render(scene, camera);
+                return;
+            }
+
+            // Normal Duel State - Ensure Guns Are Visible
+            player.gun.visible = true;
+            opponent.gun.visible = true;
+
             if (state.phase === 'wanted') {
                 wantedGroup.visible = true;
                 camera.position.x = THREE.MathUtils.lerp(camera.position.x, shakeX, 0.12);
@@ -1162,31 +1247,55 @@ export function createRenderer(canvas) {
 
             // Standoff Stillness
             if (!state.playerHasDrawn && state.playerDeathProgress === 0) {
+                player.position.set(-2.8, 0, 0);
+                player.rotation.set(0, Math.PI / 2.3, 0);
                 player.torsoGroup.position.y = 0.58;
                 player.torsoGroup.rotation.x = 0;
                 player.armRightGroup.rotation.x = 0.18;
                 player.armRightGroup.rotation.z = -0.06;
+                if (player.legL && player.legR) {
+                    player.legL.rotation.set(0, 0, 0);
+                    player.legR.rotation.set(0, 0, 0);
+                }
                 player.headGroup.rotation.y = 0;
             }
 
             if (!state.opponentHasDrawn && state.opponentDeathProgress === 0) {
+                opponent.position.set(2.8, 0, 0);
+                opponent.rotation.set(0, -Math.PI / 2.3, 0);
                 opponent.torsoGroup.position.y = 0.58;
                 opponent.torsoGroup.rotation.x = 0;
                 opponent.armRightGroup.rotation.x = 0.18;
                 opponent.armRightGroup.rotation.z = -0.06;
+                if (opponent.legL && opponent.legR) {
+                    opponent.legL.rotation.set(0, 0, 0);
+                    opponent.legR.rotation.set(0, 0, 0);
+                }
                 opponent.headGroup.rotation.y = 0;
             }
 
-            // Quick-Draw Snap
+            // Quick-Draw Snap: Arm snaps up horizontally to shoot
             if (state.playerHasDrawn) {
-                const recoil = state.muzzleFlash && state.muzzleFlash.player > 0 ? -0.22 : 0;
-                player.armRightGroup.rotation.x = THREE.MathUtils.lerp(player.armRightGroup.rotation.x, -Math.PI / 2 + recoil, 0.55);
-                player.armRightGroup.rotation.z = 0;
+                const recoil = state.muzzleFlash && state.muzzleFlash.player > 0 ? 0.25 : 0;
+                if (state.phase === 'street_walk') {
+                    player.armRightGroup.rotation.set(0.18, 0, -0.06);
+                } else {
+                    player.armRightGroup.rotation.x = THREE.MathUtils.lerp(
+                        player.armRightGroup.rotation.x,
+                        -Math.PI / 2 - recoil,
+                        0.55
+                    );
+                    player.armRightGroup.rotation.z = 0;
+                }
             }
 
             if (state.opponentHasDrawn) {
-                const recoil = state.muzzleFlash && state.muzzleFlash.opponent > 0 ? -0.22 : 0;
-                opponent.armRightGroup.rotation.x = THREE.MathUtils.lerp(opponent.armRightGroup.rotation.x, -Math.PI / 2 + recoil, 0.55);
+                const recoil = state.muzzleFlash && state.muzzleFlash.opponent > 0 ? 0.25 : 0;
+                opponent.armRightGroup.rotation.x = THREE.MathUtils.lerp(
+                    opponent.armRightGroup.rotation.x,
+                    -Math.PI / 2 - recoil,
+                    0.55
+                );
                 opponent.armRightGroup.rotation.z = 0;
             }
 
@@ -1200,7 +1309,7 @@ export function createRenderer(canvas) {
                     THREE.MathUtils.lerp(0, 0.18, t),
                     -Math.cos(Math.PI / 2.3) * (t * 0.6)
                 );
-            } else {
+            } else if (state.phase !== 'street_walk') {
                 player.position.set(-2.8, 0, 0);
                 player.rotation.set(0, Math.PI / 2.3, 0);
             }
@@ -1214,7 +1323,7 @@ export function createRenderer(canvas) {
                     THREE.MathUtils.lerp(0, 0.18, t),
                     -Math.cos(Math.PI / 2.3) * (t * 0.6)
                 );
-            } else {
+            } else if (state.phase !== 'street_walk') {
                 opponent.position.set(2.8, 0, 0);
                 opponent.rotation.set(0, -Math.PI / 2.3, 0);
             }
